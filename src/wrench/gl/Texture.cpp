@@ -214,6 +214,33 @@ bool wrench::gl::Texture::transferToTexture(const IplImage* image)
   return compatible;
 }
 
+bool wrench::gl::Texture::transferToTexture(reactor::MediaFrame& frame)
+{
+ bool compatible = _checkImageCompatibility(frame);
+
+  if(compatible)
+  {
+    const int channelCount = getChannelCount();
+
+    bind();
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, m_PBOId);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, NULL, GL_STREAM_DRAW);
+    char* gpuMem = (char*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+
+    //  Actual data transfer
+    for (unsigned int i = 0; i < m_height; i++)
+    {
+        //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
+        memcpy(gpuMem + (i * m_width * 3), (frame.getBuffer())[0] + (i * frame.getFrame()->linesize[0]), m_width * channelCount * m_dataSize);
+    }
+
+    glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB); // release pointer to mapping buffer
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format, m_dataType, 0);
+    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+  }
+  return compatible;
+}
+
 bool wrench::gl::Texture::_checkImageCompatibility(const IplImage* image) const
 {
   bool compatible = false;
@@ -223,6 +250,22 @@ bool wrench::gl::Texture::_checkImageCompatibility(const IplImage* image) const
   if(image->width	== (GLint)m_width &&
       image->height	== (GLint)m_height &&
       image->nChannels  == getChannelCount())
+  {
+    compatible = true;
+  }
+
+  return compatible;
+}
+
+bool wrench::gl::Texture::_checkImageCompatibility(const reactor::MediaFrame& frame) const
+{
+  bool compatible = false;
+
+  //    Number of channels must be the same so that memcpy can be used. This is for
+  //    the shear speed of memcpy
+  if(frame.getWidth()	== (GLint)m_width &&
+     frame.getHeight()	== (GLint)m_height &&
+      3  == getChannelCount())
   {
     compatible = true;
   }

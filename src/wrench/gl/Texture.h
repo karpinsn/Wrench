@@ -28,7 +28,9 @@
 #include "Converter.h"
 #include "OGLStatus.h"
 #include "FBO.h"
+
 #include <cv.h>
+#include <reactor/MediaFrame.h>
 
 #ifdef USE_VRJ
 #include <vrj/Draw/OpenGL/ContextData.h>
@@ -84,10 +86,13 @@ public:
   const	GLuint	getDataType(void)       const;
 
   bool	transferFromTexture(IplImage* image);
+
   bool	transferToTexture(const IplImage* image);
+  bool	transferToTexture(reactor::MediaFrame& frame);
 
 private:
-  bool	_checkImageCompatibility(const IplImage* image) const;
+  bool _checkImageCompatibility(const IplImage* image) const;
+  bool _checkImageCompatibility(const reactor::MediaFrame& frame) const;
 };
 }
 }
