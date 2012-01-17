@@ -43,12 +43,14 @@ set(GL_UTILS_SOURCES
 	gl/utils/AxisDisplay.cpp
 	gl/utils/TextureDisplay.cpp
 	gl/utils/FPSCalculator.cpp
+	gl/utils/BoundingBox.cpp
 
 	gl/utils/GradientBackground.h
 	gl/utils/Arcball.h
 	gl/utils/AxisDisplay.h
 	gl/utils/TextureDisplay.h
 	gl/utils/FPSCalculator.h
+	gl/utils/BoundingBox.h
 )
 
 set(SOURCES
