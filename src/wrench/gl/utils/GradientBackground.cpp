@@ -34,25 +34,26 @@ wrench::gl::utils::GradientBackground::~GradientBackground()
 void wrench::gl::utils::GradientBackground::draw(void)
 {
   _setMatrices();                                 //  Sets the projection and model view matrix
-
+  
   glPushAttrib(GL_ENABLE_BIT | GL_VIEWPORT_BIT);  //  Save the current state for the lighting and depth
   {
       glDisable(GL_LIGHTING);                     //  Disable lighting since it should not be lighting the background
-      glDisable(GL_DEPTH_TEST);                   //  Disable depth so that it is the farthest object in the scene
 	
       glBegin (GL_QUADS);                         //  Draw a screen aligned quad
 	  {
-        glColor3fv(m_bottomColor);                //  Color for the bottom
-		glVertex3f (-1.0f, -1.0f, -1.0f);
-		glVertex3f (1.0f, -1.0f, -1.0f);
+        glColor3f(0.8f, 0.8f, 0.8f);//glColor3fv(m_bottomColor);                //  Color for the bottom
+		glVertex3f (-1.0f, -1.0f, 0.0f);
+		glVertex3f (1.0f, -1.0f, 0.0f);
 	
-        glColor3fv(m_topColor);                   //  Color for the top
-		glVertex3f (1.0f, 1.0f, -1.0f);
-		glVertex3f (-1.0f, 1.0f, -1.0f);
+        glColor3f(0.8f, 0.8f, 0.8f);//glColor3fv(m_topColor);                   //  Color for the top
+		glVertex3f (1.0f, 1.0f, 0.0f);
+		glVertex3f (-1.0f, 1.0f, 0.0f);
 	  }
 	  glEnd ();
   }
   glPopAttrib();					 // Restore the enables that we disabled
+
+  glClear(GL_DEPTH_BUFFER_BIT);		 // Clear the depth so that it is in the back 
 
   _restoreMatrices();                // Restores the projection and model view matrix
 }
