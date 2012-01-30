@@ -1,0 +1,17 @@
+Wrench Library
+==============
+
+The Wrench library is a C++ library to assist in creating OpenGL applications that can be run in large virtual reality installations. Once you write an application with wrench it will use basic OpenGL to render graphics. When moving to virtual reality installations, simply compile with VR Juggler and Wrench will hook in accordingly.
+
+Requirements
+------------
+
+* VR Juggler 3.0+ - For running in VR installations
+
+* CMake - Used to build the build files
+
+* Doxygen - If you want to build documentation
+
+Configuration
+-------------
+Once you grab a copy of the repository, simply point your CMake file to include the wrench/src file as a libray and you should be good to go.
