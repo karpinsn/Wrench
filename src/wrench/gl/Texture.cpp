@@ -214,6 +214,9 @@ bool wrench::gl::Texture::transferToTexture(const IplImage* image)
   return compatible;
 }
 
+//  Check for reactor. If its present build with functionality otherwise dont
+//  so that we can limit dependencies
+#ifdef USE_REACTOR
 bool wrench::gl::Texture::transferToTexture(reactor::MediaFrame& frame)
 {
  bool compatible = _checkImageCompatibility(frame);
@@ -240,6 +243,7 @@ bool wrench::gl::Texture::transferToTexture(reactor::MediaFrame& frame)
   }
   return compatible;
 }
+#endif
 
 bool wrench::gl::Texture::_checkImageCompatibility(const IplImage* image) const
 {
@@ -257,6 +261,7 @@ bool wrench::gl::Texture::_checkImageCompatibility(const IplImage* image) const
   return compatible;
 }
 
+#ifdef USE_REACTOR
 bool wrench::gl::Texture::_checkImageCompatibility(const reactor::MediaFrame& frame) const
 {
   bool compatible = false;
@@ -272,3 +277,4 @@ bool wrench::gl::Texture::_checkImageCompatibility(const reactor::MediaFrame& fr
 
   return compatible;
 }
+#endif

@@ -25,12 +25,17 @@
 #include <GL/gl.h>
 #endif
 
+#include "../config-wrench.h"
+
 #include "Converter.h"
 #include "OGLStatus.h"
 #include "FBO.h"
 
 #include <cv.h>
+
+#ifdef USE_REACTOR
 #include <reactor/MediaFrame.h>
+#endif
 
 #ifdef USE_VRJ
 #include <vrj/Draw/OpenGL/ContextData.h>
@@ -88,11 +93,17 @@ public:
   bool	transferFromTexture(IplImage* image);
 
   bool	transferToTexture(const IplImage* image);
+  
+#ifdef USE_REACTOR
   bool	transferToTexture(reactor::MediaFrame& frame);
+#endif
 
 private:
   bool _checkImageCompatibility(const IplImage* image) const;
+
+#ifdef USE_REACTOR
   bool _checkImageCompatibility(const reactor::MediaFrame& frame) const;
+#endif
 };
 }
 }

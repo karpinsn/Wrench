@@ -68,6 +68,29 @@ source_group("wrench::gl::utils" FILES ${GL_UTILS_SOURCES})
 
 include_directories(..)
 
+#	-----------------------------------------------
+#   Allow Wrench to integrate with other libraries
+#   -----------------------------------------------
+option(WRENCH_REACTOR_INTEGRATION "Integrate reactor with the Wrench library" OFF)
+if(WRENCH_REACTOR_INTEGRATION)
+    SET(USE_REACTOR ON)
+else()
+    SET(USE_REACTOR OFF)
+endif()
+
+option(WRENCH_VRJ_INTEGRATION "Integrate VR Juggler with the Wrench library" OFF)
+if(WRENCH_VRJ_INTEGRATION)
+    SET(USE_VRJ ON)
+else()
+    SET(USE_VRJ OFF)
+endif()
+
+#	-----------------------------------------------
+#   Generate the config file for the code
+#   -----------------------------------------------
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config-wrench.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config-wrench.h)
+LIST(APPEND SOURCES config-wrench.h)
+
 #	---------------------------------------------------------------------------------------
 #	Build Documentation
 #	---------------------------------------------------------------------------------------
