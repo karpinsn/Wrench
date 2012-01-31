@@ -44,6 +44,7 @@ set(GL_UTILS_SOURCES
 	gl/utils/TextureDisplay.cpp
 	gl/utils/FPSCalculator.cpp
 	gl/utils/BoundingBox.cpp
+    gl/utils/CoordinateConverter.cpp
 
 	gl/utils/GradientBackground.h
 	gl/utils/Arcball.h
@@ -51,6 +52,7 @@ set(GL_UTILS_SOURCES
 	gl/utils/TextureDisplay.h
 	gl/utils/FPSCalculator.h
 	gl/utils/BoundingBox.h
+    gl/utils/CoordinateConverter.h
 )
 
 set(SOURCES

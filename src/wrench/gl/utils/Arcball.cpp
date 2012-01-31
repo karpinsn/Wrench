@@ -1,98 +1,122 @@
 #include "Arcball.h"                                   
 
-wrench::gl::Arcball::Arcball()
+wrench::gl::utils::Arcball::Arcball()
 {	
+  // Clear initial values	
+  m_center.x  = 0.0f;
+  m_center.y  = 0.0f;
+  m_center.z  = 0.0f;
+  m_radius	  = 1.0f;
+
+  m_startVector = glm::vec3(0.0f);
+  m_endVector	= glm::vec3(0.0f);
+
+  m_startQuat	= glm::quat();
+  m_currentQuat = glm::quat();
 }
 
-void wrench::gl::Arcball::init(GLfloat width, GLfloat height)
+void wrench::gl::utils::Arcball::init(float centerX, float centerY, float centerZ, float radius)
 {
-	//	Clear initial values
-	m_startVector = glm::vec3(0.0f);
-	m_endVector = glm::vec3(0.0f);
-	
-	//	Set initial bounds
-    this->setBounds(width, height);
+  //  Set values
+  m_center.x  = centerX;
+  m_center.y  = centerY;
+  m_center.z  = centerZ;
+  m_radius	  = radius;
+
+  m_startVector = glm::vec3(0.0f);
+  m_endVector	= glm::vec3(0.0f);
 }
 
-void wrench::gl::Arcball::mousePressEvent(const GLint mouseX, const GLint mouseY)
+void wrench::gl::utils::Arcball::mousePressEvent(const GLint mouseX, const GLint mouseY)
+{   
+  glm::vec4 worldCoord = m_converter.screen2World(glm::vec4(mouseX, mouseY, 0.0f, 1.0));
+
+  m_startPoint = worldCoord;
+
+  // Map the point to the sphere
+  m_startVector = mapToSphere(glm::vec2(worldCoord.x, worldCoord.y));
+  m_startQuat = m_currentQuat;
+}
+
+void wrench::gl::utils::Arcball::mouseDragEvent(const GLint mouseX, const GLint mouseY)
 {
-	m_lastRotation = m_thisRotation;
-    
-	//	Map the point to the sphere
-    m_startVector = this->mapPointToSphere(glm::vec2(mouseX, mouseY));
+  glm::vec4 worldCoord = m_converter.screen2World(glm::vec4(mouseX, mouseY, 0.0f, 1.0));
+
+  m_endPoint = worldCoord;
+
+  // Map the point to the sphere
+  m_endVector = mapToSphere(glm::vec2(worldCoord.x, worldCoord.y));
+
+  m_currentQuat = glm::cross(m_startQuat, glm::quat(glm::dot(m_startVector, m_endVector), glm::cross(m_startVector, m_endVector)));
+  m_currentQuat = glm::normalize(m_currentQuat);
 }
 
-void wrench::gl::Arcball::mouseMoveEvent(const GLint mouseX, const GLint mouseY)
+glm::mat4 wrench::gl::utils::Arcball::getTransform(void)
 {
-	glm::quat drawQuat;
-	
-    //Map the point to the sphere
-    m_endVector = this->mapPointToSphere(glm::vec2(mouseX, mouseY));
-	
-	//Compute the vector perpendicular to the begin and end vectors
-	glm::vec3 perpendicular = glm::cross(m_startVector, m_endVector);
-	
-	//Compute the length of the perpendicular vector
-	if (glm::length(perpendicular) > Epsilon)    //	if its non-zero
-	{
-		//We're ok, so return the perpendicular vector as the transform after all
-		drawQuat.x = perpendicular.x;
-		drawQuat.y = perpendicular.y;
-		drawQuat.z = perpendicular.z;
-		//In the quaternion values, w is cosine (theta / 2), where theta is rotation angle
-		drawQuat.w = glm::dot(this->m_startVector, m_endVector);
-	}
-	else                               //	if its zero
-	{
-		//The begin and end vectors coincide, so return an identity transform
-		drawQuat = glm::quat();
-	}
-	
-	drawQuat = glm::normalize(drawQuat);						//	Normalize the Quat before casting
-	m_thisRotation = glm::mat4_cast(drawQuat);
-	
-	m_thisRotation = m_thisRotation * m_lastRotation;
-	m_transform = m_thisRotation;
+  return glm::mat4_cast(m_currentQuat);
 }
 
-glm::mat4 wrench::gl::Arcball::getTransform(void)
+void wrench::gl::utils::Arcball::applyTransform(void)
 {
-	return m_transform;
+  glTranslatef(m_center.x, m_center.y, m_center.z);
+  glMultMatrixf(glm::value_ptr(glm::mat4_cast(m_currentQuat)));
+  glTranslatef(-m_center.x, -m_center.y, -m_center.z);
 }
 
-void wrench::gl::Arcball::applyTransform(void)
+#include <iostream>
+
+glm::vec3 wrench::gl::utils::Arcball::mapToSphere(const glm::vec2& point) const
 {
-	glMultMatrixf(glm::value_ptr(m_transform));
+  glm::vec3 mappedVector(0.0f);
+  
+  mappedVector.x  = (point.x - m_center.x) / m_radius;
+  mappedVector.y  = (point.y - m_center.y) / m_radius;
+
+  //	Compute the length of the vector to see if it is inside or outside the circle
+  GLfloat length = glm::length(mappedVector);
+
+  if (length > 1.0f)	//	It's on the outside
+  {
+	//	Normalize the vector
+	mappedVector = glm::normalize(mappedVector);
+  }
+  else				//	It's on the inside
+  {
+	//	Return a vector to a point mapped inside the sphere sqrt(radius squared - length)
+	mappedVector.z = glm::sqrt(1.0f - length);
+  }
+
+  return mappedVector;
 }
 
-glm::vec3 wrench::gl::Arcball::mapPointToSphere(const glm::vec2& point) const
+#include<GL/GLU.h>
+GLUquadricObj *quadric;
+bool first = true;
+void wrench::gl::utils::Arcball::draw(void)
 {
-	glm::vec3 mappedVector(0.0f);
-	
-    //	Adjust point coords and scale down to range of [-1 ... 1]
-    mappedVector.x  =        (point.x * m_adjustWidth)  - 1.0f;
-    mappedVector.y  = 1.0f - (point.y * m_adjustHeight);
-	
-    //	Compute the length of the vector to see if it is inside or outside the circle
-	GLfloat length = glm::length(mappedVector);
-	
-    if (length > 1.0f)	//	It's on the outside
-    {
-		//	Normalize the vector
-		mappedVector = glm::normalize(mappedVector);
-    }
-    else				//	It's on the inside
-    {
-        //	Return a vector to a point mapped inside the sphere sqrt(radius squared - length)
-        mappedVector.z = glm::sqrt(1.0f - length);
-    }
-	
-	return mappedVector;
-}
+  glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
-void wrench::gl::Arcball::setBounds(GLfloat width, GLfloat height)
-{		
-	//	Set adjustment factor for width & height
-	this->m_adjustWidth  = 1.0f / ((width  - 1.0f) * 0.5f);
-	this->m_adjustHeight = 1.0f / ((height - 1.0f) * 0.5f);
+  if(first)
+  {
+	first = !first;
+	quadric = gluNewQuadric();
+  }
+
+  glPushMatrix();
+  glTranslatef(m_center.x, m_center.y, m_center.z);
+  gluSphere(quadric, m_radius, 32, 32);
+  glPopMatrix();
+
+  glDisable(GL_LIGHTING);
+  glPointSize(2.0f);
+  glBegin(GL_POINTS);
+  glColor3f(0.0f, 1.0f, 0.0f);
+  glVertex3f(m_startVector.x, m_startVector.y, m_startVector.z);
+
+    glColor3f(1.0f, 0.0f, 0.0f);
+  glVertex3f(m_endVector.x, m_endVector.y, m_endVector.z);
+  glEnd();
+  glEnable(GL_LIGHTING);
+
+  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 }

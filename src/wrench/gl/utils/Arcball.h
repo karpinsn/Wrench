@@ -21,6 +21,8 @@
 	#include <GL/gl.h>
 #endif
 
+#include "CoordinateConverter.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/type_ptr.hpp>
@@ -31,36 +33,44 @@ namespace wrench
 {
 	namespace gl 
 	{
+	  namespace utils
+	  {
 		class Arcball
 		{	
 		public:
 			Arcball();
 			virtual ~Arcball() {};
-			void init(GLfloat width, GLfloat height);
+			void init(float centerX, float centerY, float centerZ, float radius);
 			
 			//Mouse down
 			void mousePressEvent(const GLint mouseX, const GLint mouseY);
 			
 			//Mouse drag, calculate rotation
-			void mouseMoveEvent(const GLint mouseX, const GLint mouseY);
+			void mouseDragEvent(const GLint mouseX, const GLint mouseY);
 			
 			glm::mat4 getTransform(void);
 			void applyTransform(void);
-			
+			void draw(void);  //  Draws an arcball control, useful for debugging
+
 		protected:
 			glm::vec3   m_startVector;      //	Saved click vector
 			glm::vec3   m_endVector;        //	Saved drag vector
-			GLfloat     m_adjustWidth;		//	Mouse bounds width
-			GLfloat     m_adjustHeight;		//	Mouse bounds height
-			
-			glm::mat4 m_transform;
-			glm::mat4 m_lastRotation;
-			glm::mat4 m_thisRotation;
-			
+
+			glm::vec4 m_startPoint;
+			glm::vec4 m_endPoint;
+
+			glm::vec3 m_center;
+			float m_radius;
+
+			glm::quat m_startQuat;
+			glm::quat m_currentQuat;
+
 		private:
-			inline glm::vec3 mapPointToSphere(const glm::vec2& point) const;
-			inline void setBounds(GLfloat width, GLfloat height);
+			CoordinateConverter m_converter;
+
+			inline glm::vec3 mapToSphere(const glm::vec2& point) const;
 		};
+	  }
 	}
 }
 
