@@ -41,11 +41,11 @@ void wrench::gl::utils::GradientBackground::draw(void)
 	
       glBegin (GL_QUADS);                         //  Draw a screen aligned quad
 	  {
-        glColor3f(0.8f, 0.8f, 0.8f);//glColor3fv(m_bottomColor);                //  Color for the bottom
+        glColor3fv(m_bottomColor);                //  Color for the bottom
 		glVertex3f (-1.0f, -1.0f, 0.0f);
 		glVertex3f (1.0f, -1.0f, 0.0f);
 	
-        glColor3f(0.8f, 0.8f, 0.8f);//glColor3fv(m_topColor);                   //  Color for the top
+        glColor3fv(m_topColor);                   //  Color for the top
 		glVertex3f (1.0f, 1.0f, 0.0f);
 		glVertex3f (-1.0f, 1.0f, 0.0f);
 	  }
