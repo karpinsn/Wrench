@@ -45,6 +45,7 @@ set(GL_UTILS_SOURCES
 	gl/utils/FPSCalculator.cpp
 	gl/utils/BoundingBox.cpp
     gl/utils/CoordinateConverter.cpp
+    gl/utils/IntersectionCalculator.cpp
 
 	gl/utils/GradientBackground.h
 	gl/utils/Arcball.h
@@ -53,6 +54,7 @@ set(GL_UTILS_SOURCES
 	gl/utils/FPSCalculator.h
 	gl/utils/BoundingBox.h
     gl/utils/CoordinateConverter.h
+    gl/utils/IntersectionCalculator.h
 )
 
 set(SOURCES

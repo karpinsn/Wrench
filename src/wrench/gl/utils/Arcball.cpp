@@ -28,7 +28,7 @@ void wrench::gl::utils::Arcball::init(float centerX, float centerY, float center
 }
 
 void wrench::gl::utils::Arcball::mousePressEvent(const GLint mouseX, const GLint mouseY)
-{   
+{ 
   glm::vec4 worldCoord = m_converter.screen2World(glm::vec4(mouseX, mouseY, 0.0f, 1.0));
 
   m_startPoint = worldCoord;
@@ -53,14 +53,12 @@ void wrench::gl::utils::Arcball::mouseDragEvent(const GLint mouseX, const GLint 
 
 glm::mat4 wrench::gl::utils::Arcball::getTransform(void)
 {
-  return glm::mat4_cast(m_currentQuat);
+  return glm::translate(glm::mat4(1.0), m_center) * glm::mat4_cast(m_currentQuat) * glm::translate(glm::mat4(1.0), -m_center);
 }
 
 void wrench::gl::utils::Arcball::applyTransform(void)
 {
-  glTranslatef(m_center.x, m_center.y, m_center.z);
-  glMultMatrixf(glm::value_ptr(glm::mat4_cast(m_currentQuat)));
-  glTranslatef(-m_center.x, -m_center.y, -m_center.z);
+  glMultMatrixf(glm::value_ptr(getTransform()));
 }
 
 #include <iostream>
@@ -107,15 +105,24 @@ void wrench::gl::utils::Arcball::draw(void)
   gluSphere(quadric, m_radius, 32, 32);
   glPopMatrix();
 
+    glPushMatrix();
+  glLoadIdentity();
+
   glDisable(GL_LIGHTING);
   glPointSize(2.0f);
   glBegin(GL_POINTS);
   glColor3f(0.0f, 1.0f, 0.0f);
-  glVertex3f(m_startVector.x, m_startVector.y, m_startVector.z);
+
+
+  glVertex3f(m_startPoint.x, m_startPoint.y, m_startPoint.z);
+
 
     glColor3f(1.0f, 0.0f, 0.0f);
-  glVertex3f(m_endVector.x, m_endVector.y, m_endVector.z);
+  glVertex3f(m_endPoint.x, m_endPoint.y, m_endPoint.z);
   glEnd();
+
+    glPopMatrix();
+
   glEnable(GL_LIGHTING);
 
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );

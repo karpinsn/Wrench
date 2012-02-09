@@ -26,6 +26,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 # define Epsilon 1.0e-5
 

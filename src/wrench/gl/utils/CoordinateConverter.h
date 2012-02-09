@@ -32,6 +32,7 @@ namespace wrench
 	  public:
 		const glm::vec4 world2Screen(const glm::vec4& worldCoordinates);
 		const glm::vec4 screen2World(const glm::vec4& screenCoordinates);
+		const glm::vec4 screen2World(const glm::mat4& modelView, const glm::vec4& screenCoordinates);
 	  };
 	}
   }
