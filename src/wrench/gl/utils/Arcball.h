@@ -22,6 +22,7 @@
 #endif
 
 #include "CoordinateConverter.h"
+#include "IntersectionCalculator.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -57,9 +58,6 @@ namespace wrench
 			glm::vec3   m_startVector;      //	Saved click vector
 			glm::vec3   m_endVector;        //	Saved drag vector
 
-			glm::vec4 m_startPoint;
-			glm::vec4 m_endPoint;
-
 			glm::vec3 m_center;
 			float m_radius;
 
@@ -67,9 +65,10 @@ namespace wrench
 			glm::quat m_currentQuat;
 
 		private:
+			IntersectionCalculator m_intersectionCalc;
 			CoordinateConverter m_converter;
 
-			inline glm::vec3 mapToSphere(const glm::vec2& point) const;
+			inline glm::vec3 mapPoint(const glm::vec2& point);
 		};
 	  }
 	}

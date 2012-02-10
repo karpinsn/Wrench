@@ -27,27 +27,21 @@ void wrench::gl::utils::Arcball::init(float centerX, float centerY, float center
   m_endVector	= glm::vec3(0.0f);
 }
 
+#include <iostream>
+
 void wrench::gl::utils::Arcball::mousePressEvent(const GLint mouseX, const GLint mouseY)
 { 
-  glm::vec4 worldCoord = m_converter.screen2World(glm::vec4(mouseX, mouseY, 0.0f, 1.0));
-
-  m_startPoint = worldCoord;
-
-  // Map the point to the sphere
-  m_startVector = mapToSphere(glm::vec2(worldCoord.x, worldCoord.y));
+  // Map the point
+  m_startVector = mapPoint(glm::vec2(mouseX, mouseY));
   m_startQuat = m_currentQuat;
 }
 
 void wrench::gl::utils::Arcball::mouseDragEvent(const GLint mouseX, const GLint mouseY)
 {
-  glm::vec4 worldCoord = m_converter.screen2World(glm::vec4(mouseX, mouseY, 0.0f, 1.0));
+  // Map the point
+  m_endVector = mapPoint(glm::vec2(mouseX, mouseY));
 
-  m_endPoint = worldCoord;
-
-  // Map the point to the sphere
-  m_endVector = mapToSphere(glm::vec2(worldCoord.x, worldCoord.y));
-
-  m_currentQuat = glm::cross(m_startQuat, glm::quat(glm::dot(m_startVector, m_endVector), glm::cross(m_startVector, m_endVector)));
+  m_currentQuat = glm::cross(glm::quat(glm::dot(m_startVector, m_endVector) / 2.0f, glm::cross(m_endVector, m_startVector)), m_startQuat);
   m_currentQuat = glm::normalize(m_currentQuat);
 }
 
@@ -63,28 +57,14 @@ void wrench::gl::utils::Arcball::applyTransform(void)
 
 #include <iostream>
 
-glm::vec3 wrench::gl::utils::Arcball::mapToSphere(const glm::vec2& point) const
+glm::vec3 wrench::gl::utils::Arcball::mapPoint(const glm::vec2& point)
 {
-  glm::vec3 mappedVector(0.0f);
-  
-  mappedVector.x  = (point.x - m_center.x) / m_radius;
-  mappedVector.y  = (point.y - m_center.y) / m_radius;
+  glm::vec4 worldCoord = m_converter.screen2World(glm::vec4(point.x, point.y, 0.0f, 1.0));
 
-  //	Compute the length of the vector to see if it is inside or outside the circle
-  GLfloat length = glm::length(mappedVector);
+  glm::vec3 intersection;
+  bool intersected = m_intersectionCalc.sphereRayIntersection(m_center, m_radius, glm::vec3(0.0f), glm::vec3(worldCoord) - glm::vec3(0.0f), intersection);
 
-  if (length > 1.0f)	//	It's on the outside
-  {
-	//	Normalize the vector
-	mappedVector = glm::normalize(mappedVector);
-  }
-  else				//	It's on the inside
-  {
-	//	Return a vector to a point mapped inside the sphere sqrt(radius squared - length)
-	mappedVector.z = glm::sqrt(1.0f - length);
-  }
-
-  return mappedVector;
+  return intersection;
 }
 
 #include<GL/GLU.h>
@@ -104,24 +84,6 @@ void wrench::gl::utils::Arcball::draw(void)
   glTranslatef(m_center.x, m_center.y, m_center.z);
   gluSphere(quadric, m_radius, 32, 32);
   glPopMatrix();
-
-    glPushMatrix();
-  glLoadIdentity();
-
-  glDisable(GL_LIGHTING);
-  glPointSize(2.0f);
-  glBegin(GL_POINTS);
-  glColor3f(0.0f, 1.0f, 0.0f);
-
-
-  glVertex3f(m_startPoint.x, m_startPoint.y, m_startPoint.z);
-
-
-    glColor3f(1.0f, 0.0f, 0.0f);
-  glVertex3f(m_endPoint.x, m_endPoint.y, m_endPoint.z);
-  glEnd();
-
-    glPopMatrix();
 
   glEnable(GL_LIGHTING);
 

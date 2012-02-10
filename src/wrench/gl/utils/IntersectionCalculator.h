@@ -24,6 +24,11 @@ namespace wrench
 										  glm::vec3& frontIntersection,
 										  glm::vec3& backIntersection);
 
+		bool sphereRayIntersection(	const glm::vec3& sphereCenter,
+									const float		 sphereRadius,
+									const glm::vec3& rayOrigin,
+									const glm::vec3& rayDirection,
+										  glm::vec3& intersection);
 	  };
 	}
   }
