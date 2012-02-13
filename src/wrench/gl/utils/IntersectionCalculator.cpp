@@ -63,19 +63,20 @@ bool wrench::gl::utils::IntersectionCalculator::sphereRayIntersection(	const glm
 	return false;
 
   float discSqrt = sqrtf(disc);
-  float q;
-  if (B < 0)
-  {
-	q = (-B - discSqrt) / 2.0f;
-  }
-  else
-  {
-	q = (-B + discSqrt) / 2.0f;
-  }
+  float q = B < 0 ? q = (-B - discSqrt) / 2.0f : (-B + discSqrt) / 2.0f;
 
   //  Compute t0 and t1 ... Used for numeric stability
   float t0 = q / A;
   float t1 = C / q;
+
+  // make sure t0 is smaller than t1
+  if (t0 > t1)
+  {
+      // if t0 is bigger than t1 swap them around
+      float temp = t0;
+      t0 = t1;
+      t1 = temp;
+  }
 
   // if t1 is less than zero, the object is in the ray's negative direction
   // and consequently the ray misses the sphere

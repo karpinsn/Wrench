@@ -64,11 +64,13 @@ namespace wrench
 			glm::quat m_startQuat;
 			glm::quat m_currentQuat;
 
+			bool m_isRotating;
+
 		private:
 			IntersectionCalculator m_intersectionCalc;
 			CoordinateConverter m_converter;
 
-			inline glm::vec3 mapPoint(const glm::vec2& point);
+			inline glm::vec3 mapPoint(const glm::vec2& point, bool& isIntersected);
 		};
 	  }
 	}
