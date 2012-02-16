@@ -21,6 +21,11 @@
 	#include <GL/gl.h>
 #endif
 
+#include "../VBO.h"
+#include "../VAO.h"
+#include "../ShaderProgram.h"
+#include "../Shader.h"
+
 #include "CoordinateConverter.h"
 #include "IntersectionCalculator.h"
 
@@ -29,7 +34,7 @@
 #include <glm/gtx/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-# define Epsilon 1.0e-5
+#define DEG_2_RAD 3.14159f / 180.0f
 
 namespace wrench
 {
@@ -70,7 +75,14 @@ namespace wrench
 			IntersectionCalculator m_intersectionCalc;
 			CoordinateConverter m_converter;
 
+			ShaderProgram m_shader;
+			VAO m_sphereManipulatorGeometry;
+			VBO m_axialRingVertex;
+			VBO m_axialRingColor;
+			VBO m_axialRingNormals;
+
 			inline glm::vec4 mapPoint(const glm::mat4 modelView, const glm::vec2& point, bool& isIntersected);
+			void _cacheGeometry(void);
 		};
 	  }
 	}
