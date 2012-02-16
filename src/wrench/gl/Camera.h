@@ -64,6 +64,7 @@ namespace wrench
 			void initRotatedCam(float eyeX, float eyeY, float eyeZ, float centerX, float centerY, float centerZ, float upX, float upY, float upZ);
 			
 			void applyMatrix();
+			const glm::mat4& getMatrix();
 			void reshape(int width, int height);
 			void mousePressed(int x, int y);
 			void mouseRelease(int x, int y);

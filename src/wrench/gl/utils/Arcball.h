@@ -45,20 +45,20 @@ namespace wrench
 			void init(float centerX, float centerY, float centerZ, float radius);
 			
 			//Mouse down
-			void mousePressEvent(const GLint mouseX, const GLint mouseY);
+			void mousePressEvent(const glm::mat4 modelView, const GLint mouseX, const GLint mouseY);
 			
 			//Mouse drag, calculate rotation
-			void mouseDragEvent(const GLint mouseX, const GLint mouseY);
+			void mouseDragEvent(const glm::mat4 modelView, const GLint mouseX, const GLint mouseY);
 			
 			glm::mat4 getTransform(void);
 			void applyTransform(void);
 			void draw(void);  //  Draws an arcball control, useful for debugging
 
 		protected:
-			glm::vec3   m_startVector;      //	Saved click vector
-			glm::vec3   m_endVector;        //	Saved drag vector
+			glm::vec4   m_startVector;      //	Saved click vector
+			glm::vec4   m_endVector;        //	Saved drag vector
 
-			glm::vec3 m_center;
+			glm::vec4 m_center;
 			float m_radius;
 
 			glm::quat m_startQuat;
@@ -70,7 +70,7 @@ namespace wrench
 			IntersectionCalculator m_intersectionCalc;
 			CoordinateConverter m_converter;
 
-			inline glm::vec3 mapPoint(const glm::vec2& point, bool& isIntersected);
+			inline glm::vec4 mapPoint(const glm::mat4 modelView, const glm::vec2& point, bool& isIntersected);
 		};
 	  }
 	}

@@ -1,32 +1,32 @@
 #include "IntersectionCalculator.h"
 
 bool wrench::gl::utils::IntersectionCalculator::planeLineIntersection(const glm::vec4& plane, 
-																	  const glm::vec3& lineStart, 
-																	  const glm::vec3& lineEnd, 
-																			glm::vec3& intersectionPoint)
+																	  const glm::vec4& lineStart, 
+																	  const glm::vec4& lineEnd, 
+																			glm::vec4& intersectionPoint)
 {
-  glm::vec3 delta = lineEnd - lineStart;
+  glm::vec4 delta = lineEnd - lineStart;
   
   float denominator = (plane.x*delta.x + plane.y*delta.y + plane.z*delta.z);
   if (! denominator) return false;
 
   float C = (plane.x*lineStart.x + plane.y*lineStart.y + plane.z*lineStart.z + plane.w) / denominator;
-  intersectionPoint = lineStart - delta * glm::vec3(C);
+  intersectionPoint = lineStart - delta * glm::vec4(C);
 
   return true;
 }
 
-bool wrench::gl::utils::IntersectionCalculator::sphereLineIntersection(const glm::vec3& sphereCenter,
+bool wrench::gl::utils::IntersectionCalculator::sphereLineIntersection(const glm::vec4& sphereCenter,
 						 											   const float		sphereRadius,
-						 											   const glm::vec3& lineStart,
-																	   const glm::vec3& lineEnd,
-																			 glm::vec3& frontIntersection,
-																			 glm::vec3& backIntersection)
+						 											   const glm::vec4& lineStart,
+																	   const glm::vec4& lineEnd,
+																			 glm::vec4& frontIntersection,
+																			 glm::vec4& backIntersection)
 {
-  glm::vec3 lineDirection = lineEnd - lineStart;
+  glm::vec4 lineDirection = lineEnd - lineStart;
   lineDirection = glm::normalize(lineDirection);
 
-  glm::vec3 v = lineStart - sphereCenter;
+  glm::vec4 v = lineStart - sphereCenter;
   float B = 2.0f * glm::dot(lineDirection, v);
   float C = glm::dot(v, v) - sphereRadius * sphereRadius;
     
@@ -45,47 +45,25 @@ bool wrench::gl::utils::IntersectionCalculator::sphereLineIntersection(const glm
   return true;
 }
 
-bool wrench::gl::utils::IntersectionCalculator::sphereRayIntersection(	const glm::vec3& sphereCenter,
+bool wrench::gl::utils::IntersectionCalculator::sphereRayIntersection(	const glm::vec4& sphereCenter,
 																		const float		 sphereRadius,
-																		const glm::vec3& rayOrigin,
-																		const glm::vec3& rayDirection,
-																			  glm::vec3& intersection)
+																		const glm::vec4& rayOrigin,
+																		const glm::vec4& rayDirection,
+																			  glm::vec4& intersection)
 {
-  //  Calculate A, B, and C coefficents of quadratic formula
-  const float A = glm::dot(rayDirection, rayDirection);
-  const float B = 2.0f * glm::dot((rayOrigin - sphereCenter), rayDirection);
-  const float C = glm::dot((rayOrigin - sphereCenter), (rayOrigin - sphereCenter)) - (sphereRadius * sphereRadius);
+  //  Calculate B, and C coefficents of quadratic formula
+  const float B = 2.0f * glm::dot(rayOrigin - sphereCenter, rayDirection);
+  const float C = glm::dot(rayOrigin - sphereCenter, rayOrigin - sphereCenter) - (sphereRadius * sphereRadius);
 
   //  Find discriminat
-  float disc = B * B - 4.0f * A * C;
+  float disc = B * B - 4.0f * C;
 
   if(disc < 0.0f) //  Ray and sphere don't intersect
 	return false;
 
   float discSqrt = sqrtf(disc);
-  float q = B < 0 ? q = (-B - discSqrt) / 2.0f : (-B + discSqrt) / 2.0f;
-
-  //  Compute t0 and t1 ... Used for numeric stability
-  float t0 = q / A;
-  float t1 = C / q;
-
-  // make sure t0 is smaller than t1
-  if (t0 > t1)
-  {
-      // if t0 is bigger than t1 swap them around
-      float temp = t0;
-      t0 = t1;
-      t1 = temp;
-  }
-
-  // if t1 is less than zero, the object is in the ray's negative direction
-  // and consequently the ray misses the sphere
-  if (t1 < 0)
-      return false;
-
-  // if t0 is less than zero, the intersection point is at t1
-  float t = t0 < 0 ? t1 : t0;
-
+  float t = (-B - discSqrt) * .5f;
   intersection = rayOrigin + rayDirection * t;
+  
   return true;
 }

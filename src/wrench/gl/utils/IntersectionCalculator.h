@@ -13,22 +13,22 @@ namespace wrench
 	  {
 	  public:
 		bool planeLineIntersection(	const glm::vec4& plane, 
-									const glm::vec3& lineStart, 
-									const glm::vec3& lineEnd, 
-										  glm::vec3& intersectionPoint);
+									const glm::vec4& lineStart, 
+									const glm::vec4& lineEnd, 
+										  glm::vec4& intersectionPoint);
 
-		bool sphereLineIntersection(const glm::vec3& sphereCenter,
+		bool sphereLineIntersection(const glm::vec4& sphereCenter,
 									const float		 sphereRadius,
-									const glm::vec3& lineStart,
-									const glm::vec3& lineEnd,
-										  glm::vec3& frontIntersection,
-										  glm::vec3& backIntersection);
+									const glm::vec4& lineStart,
+									const glm::vec4& lineEnd,
+										  glm::vec4& frontIntersection,
+										  glm::vec4& backIntersection);
 
-		bool sphereRayIntersection(	const glm::vec3& sphereCenter,
+		bool sphereRayIntersection(	const glm::vec4& sphereCenter,
 									const float		 sphereRadius,
-									const glm::vec3& rayOrigin,
-									const glm::vec3& rayDirection,
-										  glm::vec3& intersection);
+									const glm::vec4& rayOrigin,
+									const glm::vec4& rayDirection,
+										  glm::vec4& intersection);
 	  };
 	}
   }

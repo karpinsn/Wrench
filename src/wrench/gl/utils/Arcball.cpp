@@ -3,13 +3,11 @@
 wrench::gl::utils::Arcball::Arcball()
 {	
   // Clear initial values	
-  m_center.x  = 0.0f;
-  m_center.y  = 0.0f;
-  m_center.z  = 0.0f;
-  m_radius	  = 1.0f;
+  m_center		= glm::vec4(glm::vec3(0.0f), 1.0f);
+  m_radius		= 1.0f;
 
-  m_startVector = glm::vec3(0.0f);
-  m_endVector	= glm::vec3(0.0f);
+  m_startVector = glm::vec4(glm::vec3(0.0f), 0.0f);
+  m_endVector	= glm::vec4(glm::vec3(0.0f), 0.0f);
 
   m_startQuat	= glm::quat();
   m_currentQuat = glm::quat();
@@ -23,37 +21,39 @@ void wrench::gl::utils::Arcball::init(float centerX, float centerY, float center
   m_center.x  = centerX;
   m_center.y  = centerY;
   m_center.z  = centerZ;
+  m_center.w  = 1.0f;
   m_radius	  = radius;
 
-  m_startVector = glm::vec3(0.0f);
-  m_endVector	= glm::vec3(0.0f);
+  m_startVector = glm::vec4(glm::vec3(0.0f), 0.0f);
+  m_endVector	= glm::vec4(glm::vec3(0.0f), 0.0f);
 }
 
-#include <iostream>
-
-void wrench::gl::utils::Arcball::mousePressEvent(const GLint mouseX, const GLint mouseY)
+void wrench::gl::utils::Arcball::mousePressEvent(const glm::mat4 modelView, const GLint mouseX, const GLint mouseY)
 { 
   // Map the point
-  m_startVector = mapPoint(glm::vec2(mouseX, mouseY), m_isRotating);
+  m_startVector = mapPoint(modelView, glm::vec2(mouseX, mouseY), m_isRotating) - m_center;
   m_startQuat = m_currentQuat;
 }
 
-void wrench::gl::utils::Arcball::mouseDragEvent(const GLint mouseX, const GLint mouseY)
+void wrench::gl::utils::Arcball::mouseDragEvent(const glm::mat4 modelView, const GLint mouseX, const GLint mouseY)
 {
   if(m_isRotating)	// Only map the point if we have a start point
   {
 	// Map the point
 	bool intersected = false;
-	m_endVector = mapPoint(glm::vec2(mouseX, mouseY), intersected);
+	m_endVector = mapPoint(modelView, glm::vec2(mouseX, mouseY), intersected) - m_center;
 
-	m_currentQuat = glm::cross(glm::quat(glm::dot(m_startVector, m_endVector) / 2.0f, glm::cross(m_endVector, m_startVector)), m_startQuat);
-	m_currentQuat = glm::normalize(m_currentQuat);
+	glm::vec3 axis = glm::cross(glm::vec3(m_startVector), glm::vec3(m_endVector));
+	float angle = glm::dot(m_startVector, m_endVector) / (glm::length(m_startVector) * glm::length(m_endVector));
+	angle /= 2.0f;
+
+	m_currentQuat = glm::cross(glm::normalize(glm::quat(angle, axis)), m_startQuat);
   }
 }
 
 glm::mat4 wrench::gl::utils::Arcball::getTransform(void)
 {
-  return glm::translate(glm::mat4(1.0), m_center) * glm::mat4_cast(m_currentQuat) * glm::translate(glm::mat4(1.0), -m_center);
+  return glm::translate(glm::mat4(1.0), glm::vec3(m_center)) * glm::mat4_cast(m_currentQuat) * glm::translate(glm::mat4(1.0), -glm::vec3(m_center));
 }
 
 void wrench::gl::utils::Arcball::applyTransform(void)
@@ -61,28 +61,26 @@ void wrench::gl::utils::Arcball::applyTransform(void)
   glMultMatrixf(glm::value_ptr(getTransform()));
 }
 
-#include <iostream>
 
-glm::vec3 wrench::gl::utils::Arcball::mapPoint(const glm::vec2& point, bool& isIntersected)
+glm::vec4 wrench::gl::utils::Arcball::mapPoint(const glm::mat4 modelView, const glm::vec2& point, bool& isIntersected)
 { 
-  glm::mat4 modelView;
-  glGetFloatv(GL_MODELVIEW_MATRIX, glm::value_ptr(modelView));
+  glm::vec4 worldNear = m_converter.screen2World(modelView, glm::vec4(point.x, point.y, 0.0f, 1.0));
+  glm::vec4 worldFar  = m_converter.screen2World(modelView, glm::vec4(point.x, point.y, 1.0f, 1.0)); 
 
-  glm::vec4 worldCoord = m_converter.screen2World(modelView, glm::vec4(point.x, point.y, 0.0f, 1.0));
-  glm::vec4 cameraLocation(glm::vec3(0.0f), 1.0f);
-  cameraLocation = glm::inverse(modelView) * cameraLocation;
+  glm::vec4 rayDirection = worldFar - worldNear;
+  rayDirection = glm::normalize(rayDirection);
 
-  glm::vec3 intersection;
-  isIntersected = m_intersectionCalc.sphereRayIntersection(m_center, m_radius, glm::vec3(cameraLocation), glm::vec3(worldCoord) - glm::vec3(cameraLocation), intersection);
+  glm::vec4 intersection(glm::vec3(0.0f), 1.0f);
+  isIntersected = m_intersectionCalc.sphereRayIntersection(m_center, m_radius, worldNear, rayDirection, intersection);
 
   if(!isIntersected)
   {
 	//	Grab the closest point
-	intersection = (glm::vec3(worldCoord) - glm::vec3(cameraLocation)) * glm::dot(glm::vec3(worldCoord) - glm::vec3(cameraLocation), m_center - glm::vec3(cameraLocation));
+	//intersection = (rayDirection) * glm::dot(rayDirection, m_center - worldNear);
+	intersection = worldNear + rayDirection * glm::dot(m_center - worldNear, rayDirection);
   }
 
-
-  std::cout << "Int X,Y: " << intersection.x << "," << intersection.y << std::endl;
+  intersection.w = 1.0f;
 
   return intersection;
 }
@@ -101,11 +99,10 @@ void wrench::gl::utils::Arcball::draw(void)
   }
 
   glPushMatrix();
+  applyTransform();
   glTranslatef(m_center.x, m_center.y, m_center.z);
   gluSphere(quadric, m_radius, 32, 32);
   glPopMatrix();
-
-  glEnable(GL_LIGHTING);
 
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 }
