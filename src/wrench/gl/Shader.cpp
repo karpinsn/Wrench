@@ -101,6 +101,7 @@ bool wrench::gl::Shader::_validateShader(GLuint shader, const string &filename =
     if (!validShader)
     {
         Logger::logError("Error compiling shader: " + filename);
+		Logger::logError(string(buffer));
     }
 
     return validShader;

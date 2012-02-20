@@ -76,7 +76,7 @@ namespace wrench
 			CoordinateConverter m_converter;
 
 			ShaderProgram m_shader;
-			VAO m_sphereManipulatorGeometry;
+			VAO m_axialRingGeometry;
 			VBO m_axialRingVertex;
 			VBO m_axialRingColor;
 			VBO m_axialRingNormals;

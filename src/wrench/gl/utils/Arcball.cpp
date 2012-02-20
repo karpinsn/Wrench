@@ -85,47 +85,38 @@ glm::vec4 wrench::gl::utils::Arcball::mapPoint(const glm::mat4 modelView, const 
   return intersection;
 }
 
-#include<GL/GLU.h>
-GLUquadricObj *quadric;
-bool first = true;
 void wrench::gl::utils::Arcball::draw(void)
 {
   glPushMatrix();
-  applyTransform();
   glTranslatef(m_center.x, m_center.y, m_center.z);
 
-  glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-
-  if(first)
-  {
-	first = !first;
-	quadric = gluNewQuadric();
-  }
-
-  glColor3f(.8f, .8f, .8f);
-  
-  gluSphere(quadric, m_radius, 32, 32);
-
-  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
   glLineWidth(2.0f);
   glm::mat4 projectionMatrix;
   glm::mat4 modelViewMatrix;
   glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(projectionMatrix));
   glGetFloatv(GL_MODELVIEW_MATRIX, glm::value_ptr(modelViewMatrix));
+  glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelViewMatrix));   //  This is needed for lighting calculations
 
   m_shader.bind();
   {
 	m_shader.uniform("projectionMatrix", projectionMatrix);
 	m_shader.uniform("modelViewMatrix", modelViewMatrix);
-	m_sphereManipulatorGeometry.draw();
+	m_shader.uniform("normalMatrix", normalMatrix);
+	m_shader.uniform("lightPosition", glm::vec4(-2.0f, 6.0f, 8.0f, 1.0f));
+	m_shader.uniform("ringColor", glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
+	m_axialRingGeometry.draw();
+
+	m_shader.uniform("modelViewMatrix", modelViewMatrix * glm::rotate(glm::mat4(), 90.0f, glm::vec3(1.0, 0.0, 0.0)));
+	m_shader.uniform("ringColor", glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+	m_axialRingGeometry.draw();
+
+	m_shader.uniform("modelViewMatrix", modelViewMatrix * glm::rotate(glm::mat4(), 90.0f, glm::vec3(0.0, 1.0, 0.0)));
+	m_shader.uniform("ringColor", glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+	m_axialRingGeometry.draw();
   }
   m_shader.unbind();
 
-
-
   glPopMatrix();
-
-  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 }
 
 void wrench::gl::utils::Arcball::_cacheGeometry(void)
@@ -142,14 +133,14 @@ void wrench::gl::utils::Arcball::_cacheGeometry(void)
 	normals[theta] = glm::normalize(verticies[theta]);
   }
 
-  m_sphereManipulatorGeometry.init(GL_LINE_LOOP, 360);
+  m_axialRingGeometry.init(GL_LINE_LOOP, 360);
   m_axialRingVertex.init(3, GL_FLOAT, GL_ARRAY_BUFFER);
   m_axialRingVertex.bufferData(360, verticies, GL_STATIC_DRAW);
-  m_sphereManipulatorGeometry.addVBO(m_axialRingVertex, "vert");
+  m_axialRingGeometry.addVBO(m_axialRingVertex, "vert");
 
   m_axialRingNormals.init(3, GL_FLOAT, GL_ARRAY_BUFFER);
   m_axialRingNormals.bufferData(360, normals, GL_STATIC_DRAW);
-  m_sphereManipulatorGeometry.addVBO(m_axialRingNormals, "vertNormal");
+  m_axialRingGeometry.addVBO(m_axialRingNormals, "vertNormal");
 
   m_shader.init();
   m_shader.attachShader(new Shader(GL_VERTEX_SHADER, "Shaders/RotationManipulator.vert"));
