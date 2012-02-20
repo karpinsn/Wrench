@@ -90,16 +90,10 @@ GLUquadricObj *quadric;
 bool first = true;
 void wrench::gl::utils::Arcball::draw(void)
 {
-  glm::mat4 modelViewMatrix;
-  glGetFloatv(GL_MODELVIEW_MATRIX, glm::value_ptr(modelViewMatrix));
+  glPushMatrix();
+  applyTransform();
+  glTranslatef(m_center.x, m_center.y, m_center.z);
 
-  m_shader.bind();
-  {
-	m_shader.uniform("modelViewMatrix", modelViewMatrix);
-	m_sphereManipulatorGeometry.draw();
-  }
-  m_shader.unbind();
-  
   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
   if(first)
@@ -109,39 +103,25 @@ void wrench::gl::utils::Arcball::draw(void)
   }
 
   glColor3f(.8f, .8f, .8f);
-  glPushMatrix();
-  applyTransform();
-  glTranslatef(m_center.x, m_center.y, m_center.z);
-  gluSphere(quadric, m_radius, 32, 32);
-  glPopMatrix();
-
-  glPushMatrix();
-  applyTransform();
-  glTranslatef(m_center.x, m_center.y, m_center.z);
   
+  gluSphere(quadric, m_radius, 32, 32);
+
+  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
   glLineWidth(2.0f);
+  glm::mat4 projectionMatrix;
+  glm::mat4 modelViewMatrix;
+  glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(projectionMatrix));
+  glGetFloatv(GL_MODELVIEW_MATRIX, glm::value_ptr(modelViewMatrix));
 
-  /*
-  glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
-  glEnable(GL_COLOR_MATERIAL);
-  glEnable(GL_LIGHTING);
-  glColor3f(0.0f, 0.0f, 1.0f);
-  glBegin(GL_LINE_LOOP);
+  m_shader.bind();
   {
-	//	Draw Z-axis Manipulator
-	for(int theta = 0; theta < 360; ++theta)
-	{
-	  float x = m_radius * cosf(theta * DEG_2_RAD);
-	  float y = m_radius * sinf(theta * DEG_2_RAD);
-	  glm::vec3 point(x, y, 0.0f);
-
-	  glNormal3fv(glm::value_ptr(glm::normalize(point)));
-	  glVertex3fv(glm::value_ptr(point));
-	}
+	m_shader.uniform("projectionMatrix", projectionMatrix);
+	m_shader.uniform("modelViewMatrix", modelViewMatrix);
+	m_sphereManipulatorGeometry.draw();
   }
-  glEnd();
+  m_shader.unbind();
 
-  glPopAttrib();*/
+
 
   glPopMatrix();
 
@@ -150,23 +130,16 @@ void wrench::gl::utils::Arcball::draw(void)
 
 void wrench::gl::utils::Arcball::_cacheGeometry(void)
 {
-  float verticies[360*3];
-  float normals[360*3];
+  glm::vec3 verticies[360];
+  glm::vec3 normals[360];
 
   //  Cache the Axial Ring Geometry
   for(int theta = 0; theta < 360; ++theta)
   {
 	float x = m_radius * cosf(theta * DEG_2_RAD);
 	float y = m_radius * sinf(theta * DEG_2_RAD);
-	glm::vec3 point(x, y, 0.0f);
-	verticies[theta*3] = x;
-	verticies[theta*3+1] = y;
-	verticies[theta*3+2] = 0.0f;
-	//verticies[theta] = glm::vec3(x, y, 0.0f);
-	verticies[theta*3] = glm::normalize(point).x;
-	verticies[theta*3+1] = glm::normalize(point).y;
-	verticies[theta*3+2] = 0.0f;
-	//normals[theta] = glm::normalize(verticies[theta]);
+	verticies[theta] = glm::vec3(x, y, 0.0f);
+	normals[theta] = glm::normalize(verticies[theta]);
   }
 
   m_sphereManipulatorGeometry.init(GL_LINE_LOOP, 360);
