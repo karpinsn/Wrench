@@ -13,7 +13,7 @@ wrench::gl::Texture::Texture()
 {
   m_width = 0;
   m_height = 0;
-  m_fbo = NULL;
+  m_fbo = nullptr;
 }
 
 wrench::gl::Texture::~Texture()
@@ -25,7 +25,7 @@ wrench::gl::Texture::~Texture()
     glDeleteBuffers(1, &m_PBOId);
   }
 
-  if(NULL != m_fbo)
+  if(nullptr != m_fbo)
   {
     delete m_fbo;
   }
@@ -138,7 +138,7 @@ const GLuint wrench::gl::Texture::getDataType(void) const
 
 bool wrench::gl::Texture::transferFromTexture(IplImage* image)
 {
-  if(NULL == m_fbo)
+  if(nullptr == m_fbo)
   {
     m_fbo = new FBO();
     m_fbo->init(m_width, m_height);
@@ -157,7 +157,7 @@ bool wrench::gl::Texture::transferFromTexture(IplImage* image)
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
     glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, m_PBOId);
-    glBufferData(GL_PIXEL_PACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, NULL, GL_STREAM_READ);
+    glBufferData(GL_PIXEL_PACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_READ);
     glReadPixels(0, 0, m_width, m_height, m_format, m_dataType, 0);
 
 	if(GL_FLOAT == getDataType())
@@ -197,7 +197,7 @@ bool wrench::gl::Texture::transferToTexture(const IplImage* image)
 
     bind();
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, m_PBOId);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, NULL, GL_STREAM_DRAW);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
     char* gpuMem = (char*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
 
     //  Actual data transfer
@@ -227,7 +227,7 @@ bool wrench::gl::Texture::transferToTexture(reactor::MediaFrame& frame)
 
     bind();
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, m_PBOId);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, NULL, GL_STREAM_DRAW);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
     char* gpuMem = (char*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
 
     //  Actual data transfer

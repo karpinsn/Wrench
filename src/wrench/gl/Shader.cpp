@@ -26,7 +26,7 @@ bool wrench::gl::Shader::init(GLenum shaderType, const string &filename)
         
         const GLchar* shaderSource = _loadShaderSource(filename);
         
-        if (shaderSource == NULL)
+        if (shaderSource == nullptr)
         {
             Logger::logError("Shader source file not found: " + filename);
         }
@@ -42,7 +42,7 @@ bool wrench::gl::Shader::init(GLenum shaderType, const string &filename)
 
         }
 
-        if(NULL != shaderSource)
+        if(nullptr != shaderSource)
         {
             delete[] shaderSource;
         }
