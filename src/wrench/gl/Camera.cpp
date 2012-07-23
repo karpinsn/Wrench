@@ -26,7 +26,7 @@ void wrench::gl::Camera::init()
 		glGetFloatv(GL_MODELVIEW_MATRIX, glm::value_ptr(tb_transform));
 		glGetFloatv(GL_MODELVIEW_MATRIX, glm::value_ptr(tb_accuTransform));
     glPopMatrix();
-	m_viewLength = glm::value_ptr(tb_accuTransform)[14];	//	TODO come back and fix this
+	m_viewLength = glm::value_ptr(tb_accuTransform)[14];
 	m_viewLength = 1.0;
 }
 
