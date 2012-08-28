@@ -64,6 +64,13 @@ void wrench::gl::ShaderProgram::uniform(const string name, const float data)
     glUniform1f(location, data);
 }
 
+void wrench::gl::ShaderProgram::uniform(const string name, const float* data, int count)
+{
+	bind();
+	GLuint location = glGetUniformLocation(m_shaderID, name.c_str());
+	glUniform1fv(location, count, data);
+}
+
 void wrench::gl::ShaderProgram::uniform(const string name, const glm::vec3 data)
 {
   bind();

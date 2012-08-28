@@ -71,6 +71,7 @@ namespace wrench
 			
                         void uniform(const string name, const int data);
                         void uniform(const string name, const float data);
+						void uniform(const string name, const float* data, int count);
                         void uniform(const string name, const glm::vec3 data);
                         void uniform(const string name, const glm::vec4 data);
                         void uniform(const string name, const glm::mat3 data);
