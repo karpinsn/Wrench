@@ -23,8 +23,7 @@ namespace wrench
 	{
 	public:
 		static void logError(const string &message);
-
-                static void logError(const char* Format, ... );
+        static void logError(const char* Format, ... );
 		static void logDebug(const string &message);
 	};
 }
