@@ -19,12 +19,27 @@ using namespace std;
 
 namespace wrench
 {
+	enum LogLevel
+	{
+	  All = 0,
+	  Info = 1,
+	  Debug = 2,
+	  Error = 3,
+	  None = 4
+	};
+
 	class Logger
 	{
+	private:
+	  static enum LogLevel m_currentLogLevel;
+
 	public:
+		static void setLogLevel(enum LogLevel level);
+		static bool shouldLog(enum LogLevel level);
+		static enum LogLevel getLogLevel(void);
+		static void logDebug(const string &message);
 		static void logError(const string &message);
         static void logError(const char* Format, ... );
-		static void logDebug(const string &message);
 	};
 }
 

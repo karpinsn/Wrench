@@ -11,6 +11,8 @@
 
 void wrench::gl::OGLStatus::logOGLErrors(const string &label) 
 {
+  if(wrench::Logger::shouldLog(wrench::LogLevel::Error))
+  {
     GLenum errorCode;
     
     if ((errorCode = glGetError()) != GL_NO_ERROR) 
@@ -19,6 +21,7 @@ void wrench::gl::OGLStatus::logOGLErrors(const string &label)
 		errorMessage << "OpenGL ERROR: " << gluErrorString(errorCode) << "(Message: " << label << ")";
 		Logger::logError(errorMessage.str());
     }
+  }
 }
 
 bool wrench::gl::OGLStatus::logFBOStatus()
