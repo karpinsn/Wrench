@@ -1,16 +1,15 @@
 /*
- Filename:		Shader.h
- Author:		Nikolaus Karpinsky
+ Filename:		GaussianFragShader.h
+ Author:		Morgan Hoke, based on Shader.h by Nik Karpinsky
  Date Created:	09/20/10
  Last Edited:	09/20/10
  
  Revision Log:
- 09/20/10 - Nik Karpinsky - Original creation.
- 10/27/10 - Nik Karpinsky - Allows for VRJ context specific data
+ 10/2/2012  - created
  */
 
-#ifndef _WRENCH_GL_SHADER_H_
-#define _WRENCH_GL_SHADER_H_
+#ifndef _WRENCH_GL_GAUSS_FRAG_SHADER_H_
+#define _WRENCH_GL_GAUSS_FRAG_SHADER_H_
 
 #ifdef __APPLE__
 	#include <glew.h>
@@ -29,6 +28,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <Shader.h>
 
 #include "OGLStatus.h"
 
@@ -42,7 +42,7 @@ namespace wrench
 {
 	namespace gl 
 	{
-		class Shader 
+        class GaussFragShader : public Shader
 		{
 		private:
 			#ifdef USE_VRJ
@@ -51,18 +51,15 @@ namespace wrench
 			#else
                 GLuint m_shaderID;
 			#endif
-			
+             GaussFragShader(); //Killing the default constructor since we can't instantiate from a file
 		public:
-			Shader();
-                        Shader(GLenum shaderType, const string &filename);
-			~Shader();
-			
-                       virtual bool init(GLenum shaderType, const string &filename);
-
-                       GLuint shaderID(void);
-		private:
-			char* _loadShaderSource(const string &filename);
-			bool _validateShader(GLuint shader, const string &filename);
+             GaussFragShader(int KernelSize, float Sigma);
+             GaussFragShader(int KernelSize);
+            ~GaussFragShader();
+             virtual bool init(GLenum shaderType, const string &filename);
+        private:
+            bool _validateShader(GLuint shader, const string &filename);
+            bool generateAndCompileShader(int KernelSize, float Sigma);
 		};
 	}
 }
