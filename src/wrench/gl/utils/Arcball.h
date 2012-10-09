@@ -31,7 +31,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #define DEG_2_RAD 3.14159f / 180.0f

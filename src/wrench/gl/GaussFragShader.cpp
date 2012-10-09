@@ -38,17 +38,22 @@ void GetGaussCoeffs(float * buffer, float sigma, int kernelSize)
     }
 }
 //This shader is going to expect fragTexCoordOffsets as an in array, with offsets in both directions
-char * generateShaderSource(float * weightBuffer, int KernelSize)
+const char * generateShaderSource(float * weightBuffer, int KernelSize)
 {
-    char ** lines = new char *[KernelSize * 2];
-    long int numChars = 0;
+    string str;
+	str += "#version 130\n precision highp float; \n uniform sampler2D image; uniform float kernel[";
+	str += static_cast<ostringstream*>( &(ostringstream() << KernelSize * 2) )->str();
+	str += "];\n in vec2 fragTexCoordOffset[";
+	str += static_cast<ostringstream*>( &(ostringstream() << KernelSize * 2) )->str();
+	str += "];\n out vec4 filteredImage; \n void main(void) \n { \n";
     for(int i = 0; i < KernelSize*2; i ++)
     {
-        *(lines+i) =  new char[256];
-        sprintf(*(lines + i),"filteredImage += texture2D(image, fragTexCoordOffset[ %d])*%f.4;",i,*(weightBuffer+(i % KernelSize)));
-        numChars += strlen(*(lines+i));
+        char line[256];
+        sprintf(line,"filteredImage += texture2D(image, fragTexCoordOffset[ %d])*%f.4; \n",i,*(weightBuffer+(i % KernelSize)));
+        str += line;
     }
-//TODO FINISHME!
+	str += "}";
+	return str.c_str();
 }
 
 bool wrench::gl::GaussFragShader::generateAndCompileShader(int KernelSize, float Sigma)
@@ -59,7 +64,7 @@ bool wrench::gl::GaussFragShader::generateAndCompileShader(int KernelSize, float
         float * weightBuffer = new float[KernelSize];
         GetGaussCoeffs(weightBuffer, Sigma, KernelSize);
         m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
-        char * shaderSource = generateShaderSource(weightBuffer, KernelSize);
+        const char * shaderSource = generateShaderSource(weightBuffer, KernelSize);
 
         delete weightBuffer;
     }

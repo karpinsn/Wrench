@@ -28,7 +28,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
-#include <Shader.h>
+#include "Shader.h"
 
 #include "OGLStatus.h"
 
