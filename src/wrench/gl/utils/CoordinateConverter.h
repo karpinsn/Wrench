@@ -19,7 +19,7 @@
 #endif
 
 #include <glm/glm.hpp>
-#include <glm/gtx/type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace wrench
 {
