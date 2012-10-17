@@ -24,7 +24,7 @@ void wrench::gl::utils::TextureDisplay::_initShaders(void)
   m_textureDisplay.bindAttributeLocation("vertTexCoord", 1);
 
   m_textureDisplay.link();
-  m_textureDisplay.uniform("texture", 0);
+  m_textureDisplay.uniform("texture2Display", 0);
   OGLStatus::logOGLErrors("CameraGLContext - _initShaders()");
 }
 
