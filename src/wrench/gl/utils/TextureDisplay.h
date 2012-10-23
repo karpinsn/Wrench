@@ -38,8 +38,6 @@ namespace wrench
       class TextureDisplay
       {
       private:
-        Camera m_camera;
-
         ShaderProgram m_textureDisplay;
 
         bool m_hasBeenInit;
@@ -48,21 +46,15 @@ namespace wrench
         VBO m_vertex;
         VBO m_texCoords;
 
-        int m_width;
-        int m_height;
-
       public:
         TextureDisplay(void);
 
         void init(void);
         void draw(Texture* texture);
-        void resize(int width, int height);
 
       private:
         void _initShaders(void);
         void _cacheQuad(void);
-        void _setMatrices(int textureWidth, int textureHeight);
-        void _restoreMatrices(void);
       };
     }
   }

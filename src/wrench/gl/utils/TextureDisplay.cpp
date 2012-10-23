@@ -30,29 +30,16 @@ void wrench::gl::utils::TextureDisplay::_initShaders(void)
 
 void wrench::gl::utils::TextureDisplay::draw(Texture* texture)
 {
-  _setMatrices(texture->getWidth(), texture->getHeight());
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-  glPushMatrix();
+  m_textureDisplay.bind();
   {
-    OGLStatus::logOGLErrors("CameraGLContext - draw(Texture)");
-    m_textureDisplay.bind();
-    {
-      texture->bind(GL_TEXTURE0);
-      m_screen.draw();
-    }
-    m_textureDisplay.unbind();
+    texture->bind(GL_TEXTURE0);
+    m_screen.draw();
   }
-
-  _restoreMatrices();
+  m_textureDisplay.unbind();
 
   OGLStatus::logOGLErrors("CameraGLContext - draw(Texture)");
-}
-
-void wrench::gl::utils::TextureDisplay::resize(int width, int height)
-{
-  //  Need these to set the viewport in the display function
-  m_width   = width;
-  m_height  = height;
 }
 
 void wrench::gl::utils::TextureDisplay::_cacheQuad(void)
@@ -78,25 +65,4 @@ void wrench::gl::utils::TextureDisplay::_cacheQuad(void)
   m_texCoords.init(2, GL_FLOAT, GL_ARRAY_BUFFER);
   m_texCoords.bufferData(4, tex, GL_STATIC_DRAW);
   m_screen.addVBO(m_texCoords, "vertTexCoord");
-}
-
-void wrench::gl::utils::TextureDisplay::_setMatrices(int textureWidth, int textureHeight)
-{
-  //  Center the viewport
-  int x = (m_width - textureWidth) / 2.0;
-  int y = (m_height - textureHeight) / 2.0;
-  glViewport(x, y, textureWidth, textureHeight);
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-  glMatrixMode(GL_MODELVIEW);
-}
-
-void wrench::gl::utils::TextureDisplay::_restoreMatrices(void)
-{
-  glPopMatrix();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
 }
