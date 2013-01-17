@@ -198,7 +198,7 @@ bool wrench::gl::Texture::transferToTexture(const IplImage* image)
     bind();
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, m_PBOId);
     glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
-    char* gpuMem = (char*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+    char* gpuMem = (char*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
 
     //  Actual data transfer
     for (unsigned int i = 0; i < m_height; i++)
@@ -207,9 +207,9 @@ bool wrench::gl::Texture::transferToTexture(const IplImage* image)
         memcpy(gpuMem + (i * m_width * 3), image->imageData + (i * image->widthStep), m_width * channelCount * m_dataSize);
     }
 
-    glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB); // release pointer to mapping buffer
+    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB); // release pointer to mapping buffer
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format, m_dataType, 0);
-    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
   }
   return compatible;
 }

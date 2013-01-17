@@ -30,7 +30,18 @@ void wrench::Logger::logDebug(const string &message)
 {
   if(shouldLog(wrench::LogLevel::Debug))
   {
-    clog << "Debug: " << message << endl;
+	clog << "Debug: " << message << endl;
+  }
+}
+
+void wrench::Logger::logDebug(const char* format, ...)
+{
+  if(shouldLog(wrench::LogLevel::Debug))
+  {
+	va_list argPtr;
+	va_start(argPtr, format);
+	wrench::Logger::log(format, argPtr);
+	va_end(argPtr);
   }
 }
 
@@ -38,59 +49,58 @@ void wrench::Logger::logError(const string &message)
 {
   if(shouldLog(wrench::LogLevel::Error))
   {
-    clog << "Error: " << message << endl;
+	clog << "Error: " << message << endl;
   }
 }
 
-void wrench::Logger::logError(const char* Format, ... )
+void wrench::Logger::logError(const char* format, ... )
 {
   if(shouldLog(wrench::LogLevel::Error))
   {
-    va_list Arguments;
-    va_start(Arguments, Format);
-    double FArg;
-    int IArg;
-    for(int i = 0; Format[i] != '\0'; ++i )
-    {
-        if (Format[i] == 'f')
-        {
-            clog << va_arg(Arguments, double);
+	va_list argPtr;
+	va_start(argPtr, format);
+	wrench::Logger::log(format, argPtr);
+	va_end(argPtr);
+  }
+}
 
-        }
-        else if (Format[i] == 'i')
-        {
-            clog << va_arg(Arguments, int);
-        }
+void wrench::Logger::log(const char* format, va_list argPtr)
+{
+  double FArg;
+  int IArg;
+  for(int i = 0; format[i] != '\0'; ++i )
+  {
+	  if (format[i] == 'f')
+	  {
+		  clog << va_arg(argPtr, double);
 
-        switch(Format[i])
-        {
-            // string
-        case 's':
+	  }
+	  else if (format[i] == 'i')
+	  {
+		  clog << va_arg(argPtr, int);
+	  }
 
-            clog << va_arg( Arguments, char * );
-            break;
-            // character
-        case 'c':
+	  switch(format[i])
+	  {
+	  case 's':
+		  clog << va_arg(argPtr, char * );
+		  break;
+			
+	  case 'c':
+		  clog << ((char) va_arg(argPtr, int ));
+		  break;
 
-            clog << ((char) va_arg( Arguments, int ));
+	  case 'd':
+		  clog << va_arg(argPtr, int );
+		  break;
 
-            break;
+	  case 'f':
+		  clog << va_arg(argPtr, double);
+		  break;
 
-            // integer
-        case 'd':
-
-            clog << va_arg( Arguments, int );
-            break;
-        case 'f':
-            clog << va_arg(Arguments, double);
-            break;
-        default:
-            break;
-
-
-        }
-    }
-    va_end(Arguments);
+	  default:
+		  break;
+	  }
   }
 }
 

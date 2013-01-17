@@ -38,8 +38,12 @@ namespace wrench
 		static bool shouldLog(enum LogLevel level);
 		static enum LogLevel getLogLevel(void);
 		static void logDebug(const string &message);
+		static void logDebug(const char* format, ... );
 		static void logError(const string &message);
-        static void logError(const char* Format, ... );
+		static void logError(const char* format, ... );
+	
+	private:
+		static void log(const char* format, va_list argPtr);
 	};
 }
 
