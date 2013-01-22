@@ -1,10 +1,8 @@
 /*
- *  TextureFacade.cpp
- *  Holoencoder
+ *  Texture.cpp
  *
  *  Created by Nikolaus Karpinsky on 9/20/10.
  *  Copyright 2010 ISU. All rights reserved.
- *
  */
 
 #include "Texture.h"
@@ -21,13 +19,13 @@ wrench::gl::Texture::~Texture()
   //	If we have a width and height we assume to have a texture
   if(m_width != 0 && m_height != 0)
   {
-    glDeleteTextures(1, &m_textureId);
-    glDeleteBuffers(1, &m_PBOId);
+	glDeleteTextures(1, &m_textureId);
+	glDeleteBuffers(1, &m_PBOId);
   }
 
   if(nullptr != m_fbo)
   {
-    delete m_fbo;
+	delete m_fbo;
   }
 }
 
@@ -58,7 +56,7 @@ bool wrench::gl::Texture::init(const GLuint width, const GLuint height, const GL
   //	Allocate memory for the texture
   glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, dataType, 0);
 
-  OGLStatus::logOGLErrors("TextureFacade - init()");
+  OGLStatus::logOGLErrors("Texture - init()");
   return true;
 }
 
@@ -67,8 +65,8 @@ bool wrench::gl::Texture::reinit(const GLuint width, const GLuint height, const 
   //	If we have a width and height we assume to have a texture
   if(m_width != 0 && m_height != 0)
   {
-    glDeleteTextures(1, &m_textureId);
-    glDeleteBuffers(1, &m_PBOId);
+	glDeleteTextures(1, &m_textureId);
+	glDeleteBuffers(1, &m_PBOId);
   }
 
   return init(width, height, internalFormat, format, dataType);
@@ -106,11 +104,11 @@ const int wrench::gl::Texture::getChannelCount(void) const
 
   if(m_format == GL_RGB || m_format == GL_BGR)
   {
-    channelCount = 3;
+	channelCount = 3;
   }
   else if(m_format == GL_RGBA || m_format == GL_BGRA)
   {
-    channelCount = 4;
+	channelCount = 4;
   }
 
   return channelCount;
@@ -140,25 +138,25 @@ bool wrench::gl::Texture::transferFromTexture(IplImage* image)
 {
   if(nullptr == m_fbo)
   {
-    m_fbo = new FBO();
-    m_fbo->init(m_width, m_height);
-    m_fbo->setTextureAttachPoint(*this, GL_COLOR_ATTACHMENT0_EXT);
+	m_fbo = new FBO();
+	m_fbo->init(m_width, m_height);
+	m_fbo->setTextureAttachPoint(*this, GL_COLOR_ATTACHMENT0_EXT);
   }
 
   bool compatible = _checkImageCompatibility(image);
 
   if(compatible)
   {
-    const int channelCount = getChannelCount();
+	const int channelCount = getChannelCount();
 
-    bind();
-    m_fbo->bind();
-    m_fbo->bindDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+	bind();
+	m_fbo->bind();
+	m_fbo->bindDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+	glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
-    glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, m_PBOId);
-    glBufferData(GL_PIXEL_PACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_READ);
-    glReadPixels(0, 0, m_width, m_height, m_format, m_dataType, 0);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, m_PBOId);
+	glBufferData(GL_PIXEL_PACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_READ);
+	glReadPixels(0, 0, m_width, m_height, m_format, m_dataType, 0);
 
 	if(GL_FLOAT == getDataType())
 	{
@@ -181,8 +179,8 @@ bool wrench::gl::Texture::transferFromTexture(IplImage* image)
 	  }
 	}
 
-    glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB); // release pointer to mapping buffer
-    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
+	glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB); // release pointer to mapping buffer
+	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
   }
   return compatible;
 }
@@ -193,23 +191,23 @@ bool wrench::gl::Texture::transferToTexture(const IplImage* image)
 
   if(compatible)
   {
-    const int channelCount = getChannelCount();
+	const int channelCount = getChannelCount();
 
-    bind();
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, m_PBOId);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
-    char* gpuMem = (char*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+	bind();
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, m_PBOId);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
+	char* gpuMem = (char*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
 
-    //  Actual data transfer
-    for (unsigned int i = 0; i < m_height; i++)
-    {
-        //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
-        memcpy(gpuMem + (i * m_width * 3), image->imageData + (i * image->widthStep), m_width * channelCount * m_dataSize);
-    }
+	//  Actual data transfer
+	for (unsigned int i = 0; i < m_height; i++)
+	{
+		//  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
+		memcpy(gpuMem + (i * m_width * 3), image->imageData + (i * image->widthStep), m_width * channelCount * m_dataSize);
+	}
 
-    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB); // release pointer to mapping buffer
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format, m_dataType, 0);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB); // release pointer to mapping buffer
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format, m_dataType, 0);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
   }
   return compatible;
 }
@@ -223,23 +221,23 @@ bool wrench::gl::Texture::transferToTexture(reactor::MediaFrame& frame)
 
   if(compatible)
   {
-    const int channelCount = getChannelCount();
+	const int channelCount = getChannelCount();
 
-    bind();
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, m_PBOId);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
-    char* gpuMem = (char*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+	bind();
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, m_PBOId);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
+	char* gpuMem = (char*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
 
-    //  Actual data transfer
-    for (unsigned int i = 0; i < m_height; i++)
-    {
-        //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
-        memcpy(gpuMem + (i * m_width * 3), (frame.getBuffer())[0] + (i * frame.getFrame()->linesize[0]), m_width * channelCount * m_dataSize);
-    }
+	//  Actual data transfer
+	for (unsigned int i = 0; i < m_height; i++)
+	{
+		//  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
+		memcpy(gpuMem + (i * m_width * 3), (frame.getBuffer())[0] + (i * frame.getFrame()->linesize[0]), m_width * channelCount * m_dataSize);
+	}
 
-    glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB); // release pointer to mapping buffer
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format, m_dataType, 0);
-    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+	glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB); // release pointer to mapping buffer
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format, m_dataType, 0);
+	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
   }
   return compatible;
 }
@@ -252,10 +250,10 @@ bool wrench::gl::Texture::_checkImageCompatibility(const IplImage* image) const
   //    Number of channels must be the same so that memcpy can be used. This is for
   //    the shear speed of memcpy
   if(image->width	== (GLint)m_width &&
-      image->height	== (GLint)m_height &&
-      image->nChannels  == getChannelCount())
+	  image->height	== (GLint)m_height &&
+	  image->nChannels  == getChannelCount())
   {
-    compatible = true;
+	compatible = true;
   }
 
   return compatible;
@@ -269,10 +267,10 @@ bool wrench::gl::Texture::_checkImageCompatibility(const reactor::MediaFrame& fr
   //    Number of channels must be the same so that memcpy can be used. This is for
   //    the shear speed of memcpy
   if(frame.getWidth()	== (GLint)m_width &&
-     frame.getHeight()	== (GLint)m_height &&
-      3  == getChannelCount())
+	 frame.getHeight()	== (GLint)m_height &&
+	  3  == getChannelCount())
   {
-    compatible = true;
+	compatible = true;
   }
 
   return compatible;

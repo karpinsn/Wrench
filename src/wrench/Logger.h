@@ -43,6 +43,7 @@ namespace wrench
 		static void logError(const char* format, ... );
 	
 	private:
+		static void log(const string& message);
 		static void log(const char* format, va_list argPtr);
 	};
 }

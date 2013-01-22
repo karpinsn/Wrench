@@ -1,5 +1,5 @@
 /*
- Filename:		TextureFacade.h
+ Filename:		Texture.h
  Author:		Nikolaus Karpinsky
  Date Created:	09/20/10
  Last Edited:	12/07/10

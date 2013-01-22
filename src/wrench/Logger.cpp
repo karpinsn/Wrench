@@ -30,7 +30,7 @@ void wrench::Logger::logDebug(const string &message)
 {
   if(shouldLog(wrench::LogLevel::Debug))
   {
-	clog << "Debug: " << message << endl;
+	wrench::Logger::log(message);
   }
 }
 
@@ -49,7 +49,7 @@ void wrench::Logger::logError(const string &message)
 {
   if(shouldLog(wrench::LogLevel::Error))
   {
-	clog << "Error: " << message << endl;
+	wrench::Logger::log(message);
   }
 }
 
@@ -64,43 +64,17 @@ void wrench::Logger::logError(const char* format, ... )
   }
 }
 
+void wrench::Logger::log(const string& message)
+{
+  cout << " -";
+  cout << message;
+  cout << endl;
+}
+
 void wrench::Logger::log(const char* format, va_list argPtr)
 {
-  double FArg;
-  int IArg;
-  for(int i = 0; format[i] != '\0'; ++i )
-  {
-	  if (format[i] == 'f')
-	  {
-		  clog << va_arg(argPtr, double);
-
-	  }
-	  else if (format[i] == 'i')
-	  {
-		  clog << va_arg(argPtr, int);
-	  }
-
-	  switch(format[i])
-	  {
-	  case 's':
-		  clog << va_arg(argPtr, char * );
-		  break;
-			
-	  case 'c':
-		  clog << ((char) va_arg(argPtr, int ));
-		  break;
-
-	  case 'd':
-		  clog << va_arg(argPtr, int );
-		  break;
-
-	  case 'f':
-		  clog << va_arg(argPtr, double);
-		  break;
-
-	  default:
-		  break;
-	  }
-  }
+  cout << " -";
+  vprintf(format, argPtr);
+  cout << endl;
 }
 
