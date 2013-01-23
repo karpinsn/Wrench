@@ -1,5 +1,5 @@
 /*
- *  RenderTextureFacade.cpp
+ *  FBO.cpp
  *  Holoencoder
  *
  *  Created by Nikolaus Karpinsky on 9/20/10.
@@ -15,7 +15,7 @@ wrench::gl::FBO::FBO(void)
 
 wrench::gl::FBO::~FBO()
 {
-  glDeleteFramebuffersEXT(1, &m_framebuffer);
+  glDeleteFramebuffers(1, &m_framebuffer);
 }
 
 bool wrench::gl::FBO::init(int width, int height)
@@ -26,7 +26,7 @@ bool wrench::gl::FBO::init(int width, int height)
   _cacheQuad();
   _initFBO();
 
-  OGLStatus::logOGLErrors("FBOFacade - init()");
+  OGLStatus::logOGLErrors("FBO - init()");
 
   return true;
 }
@@ -36,19 +36,19 @@ bool wrench::gl::FBO::reinit(int width, int height)
   m_width = width;
   m_height = height;
 
-  glDeleteFramebuffersEXT(1, &m_framebuffer);
+  glDeleteFramebuffers(1, &m_framebuffer);
   _initFBO();
 
-  OGLStatus::logOGLErrors("FBOFacade - init()");
+  OGLStatus::logOGLErrors("FBO - init()");
 
   return true;
 }
 
 void wrench::gl::FBO::bind()
 {
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_framebuffer);
+  glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 
-  OGLStatus::logOGLErrors("FBOFacade - bind()");
+  OGLStatus::logOGLErrors("FBO - bind()");
 }
 
 void wrench::gl::FBO::process(void)
@@ -78,15 +78,15 @@ void wrench::gl::FBO::process(void)
   }
   glPopAttrib();
 
-  OGLStatus::logOGLErrors("FBOFacade - process()");
+  OGLStatus::logOGLErrors("FBO - process()");
 }
 
 void wrench::gl::FBO::unbind()
 {
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glDrawBuffer(GL_BACK);
 
-  OGLStatus::logOGLErrors("FBOFacade - unbind()");
+  OGLStatus::logOGLErrors("FBO - unbind()");
 }
 
 void wrench::gl::FBO::bindDrawBuffer(GLenum attachmentPoint)
@@ -96,7 +96,8 @@ void wrench::gl::FBO::bindDrawBuffer(GLenum attachmentPoint)
 
 void wrench::gl::FBO::setTextureAttachPoint(const Texture &texture, const GLenum attachmentPoint)
 {
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachmentPoint, texture.getTextureTarget(), texture.getTextureId(), 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentPoint, texture.getTextureTarget(), texture.getTextureId(), 0);
+  OGLStatus::logOGLErrors("FBO - setTextureAttachPoint()");
 }
 
 void wrench::gl::FBO::_cacheQuad(void)
@@ -129,19 +130,18 @@ void wrench::gl::FBO::_cacheQuad(void)
 
 void wrench::gl::FBO::_initFBO(void)
 {
-  glGenRenderbuffersEXT(1, &m_rbo);
-  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_rbo);
-  glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT,
+  glGenRenderbuffers(1, &m_rbo);
+  glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
                            m_width, m_height);
-  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
   glGenFramebuffers(1, &m_framebuffer);
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_framebuffer);
+  glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 
   // attach the renderbuffer to depth attachment point
-  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-                               GL_RENDERBUFFER_EXT, m_rbo);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                            GL_RENDERBUFFER, m_rbo);
 
-
-  OGLStatus::logOGLErrors("FBOFacade - _initFBO()");
+  OGLStatus::logOGLErrors("FBO - _initFBO()");
 }
