@@ -136,61 +136,55 @@ const GLuint wrench::gl::Texture::getDataType(void) const
 
 bool wrench::gl::Texture::transferFromTexture(IplImage* image)
 {
- // //  TODO: Not sure if this needs to be bound here
- // bind(GL_TEXTURE5);
+  //  TODO: Not sure if this needs to be bound here
+  bind(GL_TEXTURE5);
 
- // if(nullptr == m_fbo)
- // {
-	//m_fbo = new FBO();
-	//m_fbo->init(m_width, m_height);
-	//m_fbo->setTextureAttachPoint(*this, GL_COLOR_ATTACHMENT0);
- // }
+  if(nullptr == m_fbo)
+  {
+	m_fbo = new FBO();
+	m_fbo->init(m_width, m_height);
+	m_fbo->setTextureAttachPoint(*this, GL_COLOR_ATTACHMENT0);
+  }
 
- // bool compatible = _checkImageCompatibility(image);
+  bool compatible = _checkImageCompatibility(image);
 
- // if(compatible)
- // {
-	//const int channelCount = getChannelCount();
+  if(compatible)
+  {
+	const int channelCount = getChannelCount();
 
-	//m_fbo->bind();	
-	//m_fbo->bindDrawBuffer(GL_COLOR_ATTACHMENT0);
-	//glReadBuffer(GL_COLOR_ATTACHMENT0);
+	m_fbo->bind();	
+	m_fbo->bindDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
 
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, m_PBOId);
-	//glBufferData(GL_PIXEL_PACK_BUFFER, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_READ);
-	//glReadPixels(0, 0, m_width, m_height, m_format, m_dataType, 0);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, m_PBOId);
+	glBufferData(GL_PIXEL_PACK_BUFFER, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_READ);
+	glReadPixels(0, 0, m_width, m_height, m_format, m_dataType, 0);
 
-	//if(GL_FLOAT == getDataType())
-	//{
-	//  float* gpuMem = (float*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-	//  //  Actual data transfer
-	//  for (unsigned int i = 0; i < m_height; i++)
-	//  {
-	//	  //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
-	//	  memcpy(image->imageData + (i * image->widthStep), gpuMem + (i * m_width * 3), m_width * channelCount * m_dataSize);
-	//  }
-	//}
-	//else
-	//{
-	//  char* gpuMem = (char*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-	//  //  Actual data transfer
-	//  for (unsigned int i = 0; i < m_height; i++)
-	//  {
-	//	  //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
-	//	  memcpy(image->imageData + (i * image->widthStep), gpuMem + (i * m_width * 3), m_width * channelCount * m_dataSize);
-	//  }
-	//}
+	if(GL_FLOAT == getDataType())
+	{
+	  float* gpuMem = (float*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	  //  Actual data transfer
+	  for (unsigned int i = 0; i < m_height; i++)
+	  {
+		  //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
+		  memcpy(image->imageData + (i * image->widthStep), gpuMem + (i * m_width * 3), m_width * channelCount * m_dataSize);
+	  }
+	}
+	else
+	{
+	  char* gpuMem = (char*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	  //  Actual data transfer
+	  for (unsigned int i = 0; i < m_height; i++)
+	  {
+		  //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
+		  memcpy(image->imageData + (i * image->widthStep), gpuMem + (i * m_width * 3), m_width * channelCount * m_dataSize);
+	  }
+	}
 
-	//glUnmapBuffer(GL_PIXEL_PACK_BUFFER); // release pointer to mapping buffer
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
- // }
- // return compatible;
-
-  bind();
-  glGetTexImage(GL_TEXTURE_2D, 0, getFormat(), m_dataType, image->imageData);
-  OGLStatus::logOGLErrors("Texture - transferFromTexture()");
-
-  return true;
+	glUnmapBuffer(GL_PIXEL_PACK_BUFFER); // release pointer to mapping buffer
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+  }
+  return compatible;
 }
 
 bool wrench::gl::Texture::transferToTexture(const IplImage* image)
