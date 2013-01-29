@@ -7,8 +7,8 @@ wrench::gl::Shader::Shader()
 
 wrench::gl::Shader::Shader(GLenum shaderType, const string &filename)
 {
-    m_shaderID = 0;
-    init(shaderType, filename);
+	this->shaderType = shaderType;
+	this->filename = filename;
 }
 
 wrench::gl::Shader::~Shader()
@@ -16,7 +16,7 @@ wrench::gl::Shader::~Shader()
     glDeleteShader(m_shaderID);
 }
 
-bool wrench::gl::Shader::init(GLenum shaderType, const string &filename)
+bool wrench::gl::Shader::init()
 {
     bool shaderCreated = false;
 
