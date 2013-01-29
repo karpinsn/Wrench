@@ -29,7 +29,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "IShader.h"
 #include "OGLStatus.h"
 
 #ifdef USE_VRJ
@@ -42,7 +42,7 @@ namespace wrench
 {
 	namespace gl 
 	{
-		class Shader 
+		class Shader : public IShader
 		{
 		private:
 			#ifdef USE_VRJ
@@ -54,13 +54,16 @@ namespace wrench
 			
 		public:
 			Shader();
-                        Shader(GLenum shaderType, const string &filename);
+            Shader(GLenum shaderType, const string &filename);
 			~Shader();
-			
-                       virtual bool init(GLenum shaderType, const string &filename);
-
-                       GLuint shaderID(void);
+            
+			void SetShaderType(GLenum shaderType);
+			void SetFilename(const string &filename);
+			bool init();
+            GLuint shaderID(void);
 		private:
+			GLenum shaderType;
+			string filename;
 			char* _loadShaderSource(const string &filename);
 			bool _validateShader(GLuint shader, const string &filename);
 		};

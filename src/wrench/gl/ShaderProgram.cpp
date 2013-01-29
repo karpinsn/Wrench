@@ -28,7 +28,7 @@ void wrench::gl::ShaderProgram::init()
     }
 }
 
-void wrench::gl::ShaderProgram::attachShader(Shader *shader)
+void wrench::gl::ShaderProgram::attachShader(IShader *shader)
 {
     glAttachShader(m_shaderID, shader->shaderID());
 }

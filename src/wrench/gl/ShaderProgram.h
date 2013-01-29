@@ -63,7 +63,7 @@ namespace wrench
                         ShaderProgram();
                         ~ShaderProgram();
                         void init();
-                        void attachShader(Shader *shader);
+                        void attachShader(IShader *shader);
                         bool link();
 
 			void bind();

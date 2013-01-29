@@ -6,19 +6,30 @@
 
 #define PI 3.14159265
 
+
+wrench::gl::GaussFragShader::GaussFragShader()
+{
+	kernelSize = -1;
+	sigma = -1;
+}
+
 wrench::gl::GaussFragShader::GaussFragShader(int KernelSize)
 {
-    GaussFragShader(KernelSize, (float)KernelSize/3.0f);
+    kernelSize = KernelSize;
+	sigma = (float)KernelSize/3.0f;
+	initalized = false;
 }
 
 wrench::gl::GaussFragShader::GaussFragShader(int KernelSize, float Sigma)
 {
-    m_shaderID = 0;
-    generateAndCompileShader(KernelSize,Sigma);
+	kernelSize = KernelSize;
+	sigma  = Sigma;
+	initalized = false;
 }
 
 wrench::gl::GaussFragShader::~GaussFragShader()
 {
+	if (initalized)
     glDeleteShader(m_shaderID);
 }
 
@@ -37,16 +48,17 @@ void GetGaussCoeffs(float * buffer, float sigma, int kernelSize)
         *(buffer + i) /= sum;
     }
 }
-//This shader is going to expect fragTexCoordOffsets as an in array, with offsets in both directions
+
+
 const char * generateShaderSource(float * weightBuffer, int KernelSize)
 {
     string str;
 	str += "#version 130\n precision highp float; \n uniform sampler2D image; uniform float kernel[";
-	str += static_cast<ostringstream*>( &(ostringstream() << KernelSize * 2) )->str();
+	str += static_cast<ostringstream*>( &(ostringstream() << KernelSize) )->str();
 	str += "];\n in vec2 fragTexCoordOffset[";
-	str += static_cast<ostringstream*>( &(ostringstream() << KernelSize * 2) )->str();
+	str += static_cast<ostringstream*>( &(ostringstream() << KernelSize) )->str();
 	str += "];\n out vec4 filteredImage; \n void main(void) \n { \n";
-    for(int i = 0; i < KernelSize*2; i ++)
+    for(int i = 0; i < KernelSize; i ++)
     {
         char line[256];
         sprintf(line,"filteredImage += texture2D(image, fragTexCoordOffset[ %d])*%f.4; \n",i,*(weightBuffer+(i % KernelSize)));
@@ -65,16 +77,43 @@ bool wrench::gl::GaussFragShader::generateAndCompileShader(int KernelSize, float
         GetGaussCoeffs(weightBuffer, Sigma, KernelSize);
         m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
         const char * shaderSource = generateShaderSource(weightBuffer, KernelSize);
+		glShaderSource(m_shaderID, 1, &shaderSource, 0);
+
+		glCompileShader(m_shaderID);
 
         delete weightBuffer;
     }
     return generateSucessful;
 }
 
-/// This function is unimplemented and should not be used
-bool wrench::gl::GaussFragShader::init(GLenum shaderType, const string &filename)
+bool wrench::gl::GaussFragShader::init()
 {
-    return true;
+	if(kernelSize != -1 && sigma != -1)
+	{
+		return generateAndCompileShader(kernelSize, sigma);
+	}
+	else
+	{
+		Logger::logError("Parameters Kernel Size and/or Sigma not initalized!");
+		return false;
+	}
+}
+
+bool wrench::gl::GaussFragShader::init(int KernelSize)
+{
+	this->kernelSize = KernelSize;
+	if (this->sigma == -1)
+	{
+		sigma = (float)KernelSize/3.0f;
+	}
+	return generateAndCompileShader(kernelSize, sigma);
+}
+
+bool wrench::gl::GaussFragShader::init(int KernelSize, float Sigma)
+{
+	this->kernelSize = KernelSize;
+	this->sigma = Sigma;
+	return generateAndCompileShader(kernelSize, sigma);
 }
 
 GLuint wrench::gl::Shader::shaderID(void)

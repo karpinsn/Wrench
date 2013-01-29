@@ -42,7 +42,7 @@ namespace wrench
 {
 	namespace gl 
 	{
-        class GaussFragShader : public Shader
+        class GaussFragShader : public IShader
 		{
 		private:
 			#ifdef USE_VRJ
@@ -51,13 +51,19 @@ namespace wrench
 			#else
                 GLuint m_shaderID;
 			#endif
-             GaussFragShader(); //Killing the default constructor since we can't instantiate from a file
-		public:
+        public:
+			 GaussFragShader();
              GaussFragShader(int KernelSize, float Sigma);
              GaussFragShader(int KernelSize);
             ~GaussFragShader();
-             virtual bool init(GLenum shaderType, const string &filename);
+             bool init();
+			 bool init(int KernelSize);
+			 bool init(int KernelSize, float Sigma);
+			 GLuint shaderID(void);
         private:
+			int kernelSize;
+			float sigma;
+			bool initalized;
             bool _validateShader(GLuint shader, const string &filename);
             bool generateAndCompileShader(int KernelSize, float Sigma);
 		};
