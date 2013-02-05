@@ -18,7 +18,6 @@ set(GL_SOURCES
 	gl/FBO.cpp
     gl/ShaderProgram.cpp 
 	gl/Shader.cpp
-	gl/GaussFragShader.cpp
 	gl/Texture.cpp
 	gl/OGLStatus.cpp
 	gl/VBO.cpp
@@ -28,8 +27,8 @@ set(GL_SOURCES
 	gl/Camera.h
 	gl/FBO.h
     gl/ShaderProgram.h
+	gl/GaussProgram.h
 	gl/Shader.h
-	gl/GaussFragShader.h
 	gl/Texture.h
 	gl/OGLStatus.h
 	gl/VBO.h
