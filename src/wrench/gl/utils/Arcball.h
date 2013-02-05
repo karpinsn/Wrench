@@ -50,20 +50,20 @@ namespace wrench
 			void init(float centerX, float centerY, float centerZ, float radius);
 			
 			//Mouse down
-			void mousePressEvent(const glm::mat4 modelView, const GLint mouseX, const GLint mouseY);
+			void mousePressEvent(const GLint mouseX, const GLint mouseY);
 			
 			//Mouse drag, calculate rotation
-			void mouseDragEvent(const glm::mat4 modelView, const GLint mouseX, const GLint mouseY);
+			void mouseDragEvent(const GLint mouseX, const GLint mouseY);
 			
 			glm::mat4 getTransform(void);
 			void applyTransform(void);
 			void draw(void);  //  Draws an arcball control, useful for debugging
 
 		protected:
-			glm::vec4   m_startVector;      //	Saved click vector
-			glm::vec4   m_endVector;        //	Saved drag vector
+			glm::vec3   m_startVector;      //	Saved click vector
+			glm::vec3   m_endVector;        //	Saved drag vector
 
-			glm::vec4 m_center;
+			glm::vec3 m_center;
 			float m_radius;
 
 			glm::quat m_startQuat;
@@ -75,6 +75,7 @@ namespace wrench
 			IntersectionCalculator m_intersectionCalc;
 			CoordinateConverter m_converter;
 
+<<<<<<< HEAD
 			ShaderProgram m_shader;
 			VAO m_sphereManipulatorGeometry;
 			VBO m_axialRingVertex;
@@ -83,6 +84,9 @@ namespace wrench
 
 			inline glm::vec4 mapPoint(const glm::mat4 modelView, const glm::vec2& point, bool& isIntersected);
 			void _cacheGeometry(void);
+=======
+			inline glm::vec3 mapPoint(const glm::vec2& point, bool& isIntersected);
+>>>>>>> parent of 6d2ce09... Got arcball working. Near the edges there is more velocity and when you go off the ball it zooms around which needs to be fixed
 		};
 	  }
 	}

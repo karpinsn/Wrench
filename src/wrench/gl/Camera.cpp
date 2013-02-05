@@ -100,36 +100,6 @@ void wrench::gl::Camera::applyMatrix()
   glMultMatrixf(glm::value_ptr(tb_accuTransform));
 }
 
-const glm::mat4& wrench::gl::Camera::getMatrix()
-{
-  // multiple the current one with the previous transformation
-  glPushMatrix();
-  {
-	  glLoadIdentity();
-	
-	  float accRotation[16];
-	  for(int i=0; i<16;i++)
-	  {
-			accRotation[i] = glm::value_ptr(tb_accuTransform)[i];
-	  }
-	  // make accRotation as a rotation only matrix
-	  accRotation[12] = 0.0;
-	  accRotation[13] = 0.0;
-	  accRotation[14] = 0.0;
-	
-	  glTranslatef(glm::value_ptr(tb_accuTransform)[12], glm::value_ptr(tb_accuTransform)[13], glm::value_ptr(tb_accuTransform)[14]); // Translation later
-	  glMultMatrixf(glm::value_ptr(tb_transform));                     // Addition transformation second
-	  glMultMatrixf(accRotation);                      // Pure rotation first
-
-	  tb_transform = glm::mat4();
-	  glGetFloatv(GL_MODELVIEW_MATRIX, glm::value_ptr(tb_accuTransform));
-  
-  }
-  glPopMatrix();
-
-  return tb_accuTransform;
-}
-
 void wrench::gl::Camera::reshape(int width, int height)
 {
   tb_width  = width;
