@@ -49,7 +49,7 @@ namespace wrench
 	{
                 class ShaderProgram
 		{
-		private:
+		protected:
 			#ifdef USE_VRJ
                 vrj::opengl::ContextData<GLuint> vrjShaderID;
                 #define m_shaderID (*vrjShaderID)
