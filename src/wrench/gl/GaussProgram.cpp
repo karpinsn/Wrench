@@ -6,10 +6,12 @@ namespace wrench
 {
   namespace gl
   {
-	GaussProgram::GaussProgram(int KernelSize) : ShaderProgram(), m_kernelSize(KernelSize), m_sigma((float)KernelSize/3.0f)
+	GaussProgram::GaussProgram(int KernelSize) : 
+	  ShaderProgram(), m_kernelSize(KernelSize), m_sigma((float)KernelSize/3.0f), m_horizontalFilter(false)
 	{ }
 
-	GaussProgram::GaussProgram(int KernelSize, float Sigma) : m_kernelSize(KernelSize), m_sigma(Sigma)
+	GaussProgram::GaussProgram(int KernelSize, float Sigma) : 
+	  ShaderProgram(), m_kernelSize(KernelSize), m_sigma(Sigma), m_horizontalFilter(false)
 	{ }
 
 	GaussProgram::~GaussProgram( )
@@ -30,7 +32,7 @@ namespace wrench
 	  for (int i = 0; i < m_kernelSize; ++i)
 	  {
 		int offset = i - ( ( m_kernelSize - 1 ) / 2 );
-		coefficients[i] = exp(-1.0f * (offset * offset) / ( 2.0 * m_sigma * m_sigma)); 
+		coefficients[i] = exp(-1.0f * (float)(offset * offset) / ( 2.0f * m_sigma * m_sigma)); 
 		sum += coefficients[i];
 	  }
 	  //  Quick normalization
@@ -74,6 +76,7 @@ namespace wrench
 	  glShaderSource(m_vertID, 1, &shaderSource, 0);
 	  glCompileShader(m_vertID);
 	  glGetShaderiv(m_vertID, GL_COMPILE_STATUS, &status);
+	  glAttachShader(m_shaderID, m_vertID);
 	  return status;
 	}
 
@@ -105,16 +108,21 @@ namespace wrench
 	  glShaderSource(m_fragID, 1, &shaderSource, 0);
 	  glCompileShader(m_fragID);
 	  glGetShaderiv(m_fragID, GL_COMPILE_STATUS, &status);
+	  glAttachShader(m_shaderID, m_fragID);
 
 	  return status;
+	}
+
+	void GaussProgram::setImageDimensions(int width, int height)
+	{
+	  uniform("width", (float)width);
+	  uniform("height", (float)height);
 	}
 
 	void GaussProgram::init()
 	{
 	  if(GLEW_VERSION_2_0)
 	  {
-		int status;
-		
 		//Set up a handle to our shader program
 		m_shaderID = glCreateProgram();
 
@@ -126,6 +134,10 @@ namespace wrench
 		
 		if(_attachVertShader( ) != GL_TRUE)
 		  { Logger::logError("Vert Shader did not compile"); }
+
+		//	Finally link and set the filter direction
+		link();
+		uniform("horizontalFilter", m_horizontalFilter);
 	  }
 	  else
 	  {
@@ -136,6 +148,12 @@ namespace wrench
 	void GaussProgram::attachShader(Shader *shader)
 	{
 	  Logger::logError("Attaching custom shaders not supported by Gauss Program");
+	}
+
+	void GaussProgram::flipFilter( void )
+	{
+	  m_horizontalFilter = !m_horizontalFilter;
+	  uniform("horizontalFilter", m_horizontalFilter);
 	}
   }
 }
