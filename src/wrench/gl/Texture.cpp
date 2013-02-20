@@ -72,12 +72,12 @@ bool wrench::gl::Texture::reinit(const GLuint width, const GLuint height, const 
   return init(width, height, internalFormat, format, dataType);
 }
 
-void wrench::gl::Texture::bind()
+void wrench::gl::Texture::bind() const
 {
   glBindTexture(GL_TEXTURE_2D, m_textureId);
 }
 
-void wrench::gl::Texture::bind(GLenum texture)
+void wrench::gl::Texture::bind(GLenum texture) const
 {
   glActiveTexture(texture);
   glBindTexture(GL_TEXTURE_2D, m_textureId);
