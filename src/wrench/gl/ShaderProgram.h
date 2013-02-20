@@ -49,7 +49,7 @@ namespace wrench
 	{
                 class ShaderProgram
 		{
-		private:
+		protected:
 			#ifdef USE_VRJ
                 vrj::opengl::ContextData<GLuint> vrjShaderID;
                 #define m_shaderID (*vrjShaderID)
@@ -62,22 +62,22 @@ namespace wrench
 		public:
                         ShaderProgram();
                         ~ShaderProgram();
-                        void init();
-                        void attachShader(Shader *shader);
+                        virtual void init();
+                        virtual void attachShader(Shader *shader);
                         bool link();
 
 			void bind();
 			void unbind();
 			
-                        void uniform(const string name, const int data);
-                        void uniform(const string name, const float data);
-						void uniform(const string name, const float *data, int count);
-                        void uniform(const string name, const glm::vec3 data);
-                        void uniform(const string name, const glm::vec4 data);
-                        void uniform(const string name, const glm::mat3 data);
-                        void uniform(const string name, const glm::mat4 data);
-                        void uniformMat4(const string name, GLboolean transpose, const GLfloat *value);
-                        void bindAttributeLocation(const string name, const GLuint index);
+                        virtual void uniform(const string name, const int data);
+                        virtual void uniform(const string name, const float data);
+						virtual void uniform(const string name, const float *data, int count);
+                        virtual void uniform(const string name, const glm::vec3 data);
+                        virtual void uniform(const string name, const glm::vec4 data);
+                        virtual void uniform(const string name, const glm::mat3 data);
+                        virtual void uniform(const string name, const glm::mat4 data);
+                        virtual void uniformMat4(const string name, GLboolean transpose, const GLfloat *value);
+                        virtual void bindAttributeLocation(const string name, const GLuint index);
 			
 		private:
 			bool _validateProgram(GLuint program);
