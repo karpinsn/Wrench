@@ -29,99 +29,102 @@ namespace wrench
 	  float sum = 0;
 	  for (int i = 0; i < m_kernelSize; ++i)
 	  {
-		// Got this formula from wikipedia, worked in test code, needs checked for transcription errors
-		coefficients[i] = (1.0f / sqrt(2.0f * 3.14159265359f * pow(m_sigma,2.0f))) * exp(-1.0f * (pow(i - ((float)m_kernelSize/2.0f),2.0f)/(2.0f*pow(m_sigma, 2.0f))));
+		int offset = i - ( ( m_kernelSize - 1 ) / 2 );
+		coefficients[i] = exp(-1.0f * (offset * offset) / ( 2.0 * m_sigma * m_sigma)); 
 		sum += coefficients[i];
 	  }
+	  //  Quick normalization
 	  for(int i = 0; i < m_kernelSize; ++i)
-	  {
-		coefficients[i] /= sum;
-	  }
+		{ coefficients[i] /= sum; }
 
 	  return coefficients;
 	}
 
-	const char* GaussProgram::_generateVertShaderSource( )
+	const int GaussProgram::_attachVertShader( )
 	{
-	  string str;
-	  str+="#version 130\n precision highp float; out vec2 fragTexCoordOffset[";
-	  str+= to_string((long long)m_kernelSize);
-	  str+= "];\n void main(void)\n {\n";
+	  string source;
+	  int status;
+
+	  source += "#version 130\n";
+	  source += "precision highp float;\n\n";
+	  source += "uniform float width;\n";
+	  source += "uniform float height;\n";
+	  source += "uniform bool horizontalFilter;\n\n";
+	  source += "in vec3 vert;\n";
+	  source += "in vec2 vertTexCoord;\n";
+	  source += "out vec2 fragTexCoordOffset[" + to_string((long long)m_kernelSize) + "];\n\n";
+	  source += "float step_w = 1.0 / width * float(horizontalFilter);\n";
+	  source += "float step_h = 1.0 / height * float(!horizontalFilter);\n\n";
+	  source += "void main(void)\n";
+	  source += "{\n";
 	  for(int i = 0; i < m_kernelSize; i++)
 	  {
-		str+= "fragTexCoordOffset[";
-		str+= to_string((long long) i);
-		str+= "] = ";
-		str+= to_string((long long)(i -(m_kernelSize/2)));
-		str+=  ";\n";
+		// Currently VC++10 does not have all the to_string overloads in. Use long double to circumvent this
+		long double offset = i - ( ( m_kernelSize - 1 ) / 2 );
+
+		source += "\tfragTexCoordOffset[" + to_string((long long) i) + "] = ";
+		source += "vertTexCoord + vec2(" + ::to_string(offset) + " * step_w," + ::to_string(offset) + " * step_h);\n";
 	  }
-	  str += "}";
-	  return str.c_str();
+	  source += "\tgl_Position = vec4(vert, 1.0);\n";
+	  source += "}";
+	  
+	  const char* shaderSource = source.c_str( );
+
+	  m_vertID = glCreateShader(GL_VERTEX_SHADER);
+	  glShaderSource(m_vertID, 1, &shaderSource, 0);
+	  glCompileShader(m_vertID);
+	  glGetShaderiv(m_vertID, GL_COMPILE_STATUS, &status);
+	  return status;
 	}
 
-	const char* GaussProgram::_generateFragShaderSource( )
+	const int GaussProgram::_attachFragShader( )
 	{
+	  int status;
+	  string source;
 	  auto coefficients = _GetGaussCoeffs( );
+	  
+	  source += "#version 130\n";
+	  source += "precision highp float;\n\n";
+	  source += "uniform sampler2D image;\n\n";
+	  source += "in vec2 fragTexCoordOffset[" + to_string((long long)m_kernelSize) + "];\n";
+	  source += "out vec4 filteredImage;\n\n";
+	  source += "void main(void)\n";
+	  source += "{ \n";
+	  source += "\tfilteredImage = vec4(0.0);\n";
+	  for(int i = 0; i < m_kernelSize; i ++)
+	  {
+		source += "\tfilteredImage += texture(image, ";
+		source += "fragTexCoordOffset[" + to_string((long long)i) + "]) * ";
+		source += to_string((long double) coefficients[i]) + ";\n";
+	  }
+	  source +="}\n";
 
-	  string str;
-	  str += "#version 130\n precision highp float;\n uniform sampler2D image; uniform bool h_or_V;\n in vec2 fragTexCoordOffset[";
-	  str += to_string((long long)m_kernelSize);
-	  str += "];\n out vec4 filteredImage; \n void main(void) \n { \n";
-	  str += "if(h_or_v == true)//true = horizontal\n {\n";
-	  for(int i = 0; i < m_kernelSize; i ++)
-	  {
-		//line looks like this : 
-		//filteredImage += texture2D(image, fragTexCoordOffset[i]) * (*(weightBuffer + i));\n
-		//i and *(weightBuffer + i) get hard-coded as values in the shader code
-		str += "filteredImage += texture2D(image, vec2(gl_FragCoord.x + glfragTexCoordOffset[";
-		str += to_string((long long)i);
-		str += "], gl_FragCoord.y))*";
-		str += to_string((long long) coefficients[i]);
-		str += "; \n";
-	  }
-	  for(int i = 0; i < m_kernelSize; i ++)
-	  {
-		//line looks like this : 
-		//filteredImage += texture2D(image, fragTexCoordOffset[i]) * (*(weightBuffer + i));\n
-		//i and *(weightBuffer + i) get hard-coded as values in the shader code
-		str += "filteredImage += texture2D(image, vec2(gl_FragCoord.x, gl_FragCoord.y + glfragTexCoordOffset[";
-		str += to_string((long long)i);
-		str += "]))*";
-		str += to_string((long long) coefficients[i]);
-		str += "; \n";
-	  }
-	  str += "} \n else\n{\n";
-	  str+=" }\n}";
-	  return str.c_str();
+	  const char* shaderSource = source.c_str( );
+
+	  m_fragID = glCreateShader(GL_FRAGMENT_SHADER);
+	  glShaderSource(m_fragID, 1, &shaderSource, 0);
+	  glCompileShader(m_fragID);
+	  glGetShaderiv(m_fragID, GL_COMPILE_STATUS, &status);
+
+	  return status;
 	}
 
 	void GaussProgram::init()
 	{
 	  if(GLEW_VERSION_2_0)
 	  {
+		int status;
+		
 		//Set up a handle to our shader program
 		m_shaderID = glCreateProgram();
 
-		//Begin Frag Shader Generation
-		m_fragID = glCreateShader(GL_FRAGMENT_SHADER);
-		const char* shaderSource = _generateFragShaderSource( );
-		
-		glShaderSource(m_fragID, 1, &shaderSource, 0);
-		glCompileShader(m_fragID);
-		int status;
-		glGetShaderiv(m_fragID, GL_COMPILE_STATUS, &status);
-		
-		if(status != GL_TRUE)
+		// Create and attach the fragment shader
+		if(_attachFragShader( ) != GL_TRUE)
 		  { Logger::logError("Frag Shader did not compile"); }
 
-		//End Frag Shader Generation
-		//Begin Vertex Shader Generation
-		m_vertID = glCreateShader(GL_VERTEX_SHADER);
-		shaderSource = _generateVertShaderSource( );
-		glShaderSource(m_vertID, 1, &shaderSource, 0);
-		glGetShaderiv(m_vertID, GL_COMPILE_STATUS, &status);
+		// Create and attach the vert shader
 		
-		if(status != GL_TRUE)
+		if(_attachVertShader( ) != GL_TRUE)
 		  { Logger::logError("Vert Shader did not compile"); }
 	  }
 	  else

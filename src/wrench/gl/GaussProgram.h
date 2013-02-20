@@ -11,7 +11,7 @@ namespace wrench
 {
   namespace gl
   {
-	class GaussProgram : ShaderProgram
+	class GaussProgram : public ShaderProgram
 	{
 	private:
 	  const int m_kernelSize;
@@ -35,8 +35,8 @@ namespace wrench
 	  virtual void attachShader(Shader *shader) override;//This is to make sure we don't mess anything up
 	
 	private:
-	  const char* _generateVertShaderSource( );
-	  const char* _generateFragShaderSource( );
+	  const int _attachVertShader( );
+	  const int _attachFragShader( );
 	  unique_ptr<float[]> _GetGaussCoeffs( );
 	};
   }
