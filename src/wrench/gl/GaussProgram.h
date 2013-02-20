@@ -1,5 +1,7 @@
-#ifndef _GAUSS_PRGM_
-#define _GAUSS_PRGM_
+#ifndef _WRENCH_GL_GAUSS_PROGRAM_H_ 
+#define _WRENCH_GL_GAUSS_PROGRAM_H_
+
+#include <memory>
 
 #include"ShaderProgram.h"
 
@@ -7,27 +9,36 @@ using namespace std;
 
 namespace wrench
 {
-	namespace gl
+  namespace gl
+  {
+	class GaussProgram : ShaderProgram
 	{
-			class GaussProgram : ShaderProgram
-			{
-			public:
-					GaussProgram(int KenrelSize);
-					GaussProgram(int KernelSize, float Sigma);
-					~GaussProgram();
-					virtual void init() override;
-					virtual void attachShader(Shader *shader) override;//This is to make sure we don't mess anything up
-					virtual void uniform(const string name, const bool data); //Use this for h_or_v
+	private:
+	  const int m_kernelSize;
+	  const float m_sigma;
 
-			
-			private:
-				int kernelSize;
-				float sigma;
-				GLuint fragID;
-				GLuint vertID;
+	  #ifdef USE_VRJ
+		vrj::opengl::ContextData<GLuint> vrjFragID;
+		vrj::opengl::ContextData<GLuint> vrjVertID;
+		#define m_fragID (*vrjFragID)
+		#define m_vertID (*vrjVertID)
+	  #else
+		GLuint m_fragID;
+		GLuint m_vertID;
+	  #endif
 
-				void generateAndCompileShader(int KernelSize, float Sigma);
-			};
-	}
+	public:
+	  GaussProgram(int KenrelSize);
+	  GaussProgram(int KernelSize, float Sigma);
+	  virtual ~GaussProgram( );
+	  virtual void init() override;
+	  virtual void attachShader(Shader *shader) override;//This is to make sure we don't mess anything up
+	
+	private:
+	  const char* _generateVertShaderSource( );
+	  const char* _generateFragShaderSource( );
+	  unique_ptr<float[]> _GetGaussCoeffs( );
+	};
+  }
 }
-#endif
+#endif // _WRENCH_GL_GAUSS_PROGRAM_H_
