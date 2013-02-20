@@ -66,7 +66,7 @@ char* wrench::gl::Shader::_loadShaderSource(const string &filename)
     if(shaderFile.is_open())
     {
         //	Get the size of the file
-        long size = shaderFile.tellg();
+        long size = (long)shaderFile.tellg();
 
         //	If there is source read it in
         if (size > 0)

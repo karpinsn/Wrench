@@ -9,7 +9,7 @@
 
 #include "Logger.h"
 
-wrench::LogLevel wrench::Logger::m_currentLogLevel = wrench::LogLevel::Error;
+wrench::Logger::LogLevel wrench::Logger::m_currentLogLevel = wrench::Logger::Error;
 
 void wrench::Logger::setLogLevel(enum LogLevel level)
 {
@@ -21,14 +21,14 @@ bool wrench::Logger::shouldLog(enum LogLevel level)
   return level >= m_currentLogLevel;
 }
 
-enum wrench::LogLevel wrench::Logger::getLogLevel(void)
+enum wrench::Logger::LogLevel wrench::Logger::getLogLevel(void)
 {
   return m_currentLogLevel;
 }
 
 void wrench::Logger::logDebug(const string &message)
 {
-  if(shouldLog(wrench::LogLevel::Debug))
+  if(shouldLog(wrench::Logger::Debug))
   {
 	wrench::Logger::log(message);
   }
@@ -36,7 +36,7 @@ void wrench::Logger::logDebug(const string &message)
 
 void wrench::Logger::logDebug(const char* format, ...)
 {
-  if(shouldLog(wrench::LogLevel::Debug))
+  if(shouldLog(wrench::Logger::Debug))
   {
 	va_list argPtr;
 	va_start(argPtr, format);
@@ -47,7 +47,7 @@ void wrench::Logger::logDebug(const char* format, ...)
 
 void wrench::Logger::logError(const string &message)
 {
-  if(shouldLog(wrench::LogLevel::Error))
+  if(shouldLog(wrench::Logger::Error))
   {
 	wrench::Logger::log(message);
   }
@@ -55,7 +55,7 @@ void wrench::Logger::logError(const string &message)
 
 void wrench::Logger::logError(const char* format, ... )
 {
-  if(shouldLog(wrench::LogLevel::Error))
+  if(shouldLog(wrench::Logger::Error))
   {
 	va_list argPtr;
 	va_start(argPtr, format);

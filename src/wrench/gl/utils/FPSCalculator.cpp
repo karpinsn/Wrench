@@ -16,7 +16,7 @@ double wrench::gl::utils::FPSCalculator::getFrameRate(void)
   time_t currentTime = time(nullptr);
   double timeInterval = difftime(currentTime, m_previousTime);
 
-  float framesPerSecond = m_frameCount / timeInterval;
+  double framesPerSecond = (double)m_frameCount / timeInterval;
   m_previousTime = currentTime;
   m_frameCount = 0;
 

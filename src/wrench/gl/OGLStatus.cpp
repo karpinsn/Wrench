@@ -11,7 +11,7 @@
 
 void wrench::gl::OGLStatus::logOGLErrors(const string &label) 
 {
-  if(wrench::Logger::shouldLog(wrench::LogLevel::Error))
+  if(wrench::Logger::shouldLog(wrench::Logger::Error))
   {
     GLenum errorCode;
     
