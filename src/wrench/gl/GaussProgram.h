@@ -16,17 +16,9 @@ namespace wrench
 					GaussProgram(int KernelSize, float Sigma);
 					~GaussProgram();
 					virtual void init() override;
-					virtual void attachShader(Shader *shader) override;
+					virtual void attachShader(Shader *shader) override;//This is to make sure we don't mess anything up
+					virtual void uniform(const string name, const bool data); //Use this for h_or_v
 
-					virtual void uniform(const string name, const int data) override;
-                    virtual void uniform(const string name, const float data) override;
-					virtual void uniform(const string name, const float *data, int count) override;
-                    virtual void uniform(const string name, const glm::vec3 data) override;
-                    virtual void uniform(const string name, const glm::vec4 data) override;
-                    virtual void uniform(const string name, const glm::mat3 data) override;
-                    virtual void uniform(const string name, const glm::mat4 data) override;
-                    virtual void uniformMat4(const string name, GLboolean transpose, const GLfloat *value) override;
-                    virtual void bindAttributeLocation(const string name, const GLuint index) override;
 			
 			private:
 				int kernelSize;
@@ -38,5 +30,4 @@ namespace wrench
 			};
 	}
 }
-
 #endif
