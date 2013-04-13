@@ -76,6 +76,7 @@ namespace wrench
 	  virtual void uniform(const string name, const glm::vec4 data);
 	  virtual void uniform(const string name, const glm::mat3 data);
 	  virtual void uniform(const string name, const glm::mat4 data);
+	  virtual void uniform(const string name, const glm::mat4x3 data);
 	  virtual void uniformMat4(const string name, GLboolean transpose, const GLfloat *value);
 	  virtual void bindAttributeLocation(const string name, const GLuint index);
 
