@@ -187,6 +187,31 @@ bool wrench::gl::Texture::transferFromTexture(IplImage* image)
   return compatible;
 }
 
+bool wrench::gl::Texture::transferToTexture(const cv::Mat image )
+{
+  if( !_checkImageCompatibility(image) )
+	{ return false; }
+
+  const int channelCount = getChannelCount();
+  bind();
+  glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBOId);
+  glBufferData(GL_PIXEL_UNPACK_BUFFER, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
+  char* gpuMem = (char*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+
+  //  Actual data transfer
+  for (unsigned int i = 0; i < m_height; i++)
+  {
+	  //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
+	  memcpy(gpuMem + (i * m_width * 3), image.data + (i * image.step), m_width * channelCount * m_dataSize);
+  }
+
+  glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // release pointer to mapping buffer
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format, m_dataType, 0);
+  glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+  return true;
+}
+
 bool wrench::gl::Texture::transferToTexture(const IplImage* image)
 {
   bool compatible = _checkImageCompatibility(image);
@@ -245,20 +270,25 @@ bool wrench::gl::Texture::transferToTexture(reactor::MediaFrame& frame)
 }
 #endif
 
-bool wrench::gl::Texture::_checkImageCompatibility(const IplImage* image) const
+bool wrench::gl::Texture::_checkImageCompatibility(const cv::Mat image) const
 {
   bool compatible = false;
 
   //    Number of channels must be the same so that memcpy can be used. This is for
   //    the shear speed of memcpy
-  if(image->width	== (GLint)m_width &&
-	  image->height	== (GLint)m_height &&
-	  image->nChannels  == getChannelCount())
+  if(image.cols	== (GLint)m_width &&
+	 image.rows	== (GLint)m_height &&
+	 image.channels()  == getChannelCount())
   {
 	compatible = true;
   }
 
   return compatible;
+}
+
+bool wrench::gl::Texture::_checkImageCompatibility(const IplImage* image) const
+{
+  return _checkImageCompatibility(cv::Mat(image));
 }
 
 #ifdef USE_REACTOR

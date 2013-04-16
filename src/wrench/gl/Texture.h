@@ -90,15 +90,18 @@ public:
   const	GLuint	getFormat(void)         const;
   const	GLuint	getDataType(void)       const;
 
-  bool	transferFromTexture(IplImage* image);
+  bool		transferFromTexture( IplImage* image );
+  cv::Mat	transferFromAsCvMat( void );
 
-  bool	transferToTexture(const IplImage* image);
+  bool		transferToTexture( const cv::Mat image );
+  bool		transferToTexture( const IplImage* image );
   
 #ifdef USE_REACTOR
   bool	transferToTexture(reactor::MediaFrame& frame);
 #endif
 
 private:
+  bool _checkImageCompatibility(const cv::Mat image) const;
   bool _checkImageCompatibility(const IplImage* image) const;
 
 #ifdef USE_REACTOR
