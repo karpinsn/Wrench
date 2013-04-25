@@ -167,7 +167,7 @@ bool wrench::gl::Texture::transferFromTexture(IplImage* image)
 	  for (unsigned int i = 0; i < m_height; i++)
 	  {
 		  //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
-		  memcpy(image->imageData + (i * image->widthStep), gpuMem + (i * m_width * 3), m_width * channelCount * m_dataSize);
+		  memcpy(image->imageData + (i * image->widthStep), gpuMem + (i * m_width *channelCount), m_width * channelCount * m_dataSize);
 	  }
 	}
 	else
@@ -177,7 +177,7 @@ bool wrench::gl::Texture::transferFromTexture(IplImage* image)
 	  for (unsigned int i = 0; i < m_height; i++)
 	  {
 		  //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
-		  memcpy(image->imageData + (i * image->widthStep), gpuMem + (i * m_width * 3), m_width * channelCount * m_dataSize);
+		  memcpy(image->imageData + (i * image->widthStep), gpuMem + (i * m_width * channelCount), m_width * channelCount * m_dataSize);
 	  }
 	}
 
@@ -202,7 +202,7 @@ bool wrench::gl::Texture::transferToTexture(const cv::Mat image )
   for (unsigned int i = 0; i < m_height; i++)
   {
 	  //  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
-	  memcpy(gpuMem + (i * m_width * 3), image.data + (i * image.step), m_width * channelCount * m_dataSize);
+	memcpy(gpuMem + (i * m_width * channelCount * m_dataSize), image.data + (i * image.step), m_width * channelCount * m_dataSize);
   }
 
   glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // release pointer to mapping buffer
@@ -214,29 +214,7 @@ bool wrench::gl::Texture::transferToTexture(const cv::Mat image )
 
 bool wrench::gl::Texture::transferToTexture(const IplImage* image)
 {
-  bool compatible = _checkImageCompatibility(image);
-
-  if(compatible)
-  {
-	const int channelCount = getChannelCount();
-
-	bind();
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBOId);
-	glBufferData(GL_PIXEL_UNPACK_BUFFER, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_DRAW);
-	char* gpuMem = (char*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-
-	//  Actual data transfer
-	for (unsigned int i = 0; i < m_height; i++)
-	{
-		//  OpenCV does not guarentee continous memory blocks so it has to be copied row by row
-		memcpy(gpuMem + (i * m_width * 3), image->imageData + (i * image->widthStep), m_width * channelCount * m_dataSize);
-	}
-
-	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // release pointer to mapping buffer
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format, m_dataType, 0);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-  }
-  return compatible;
+  return transferToTexture(cv::Mat(image));
 }
 
 //  Check for reactor. If its present build with functionality otherwise dont
