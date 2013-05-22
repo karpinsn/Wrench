@@ -10,8 +10,7 @@
 #include "FBO.h"
 
 wrench::gl::FBO::FBO(void)
-{
-}
+{ }
 
 wrench::gl::FBO::~FBO()
 {
@@ -97,6 +96,12 @@ void wrench::gl::FBO::bindDrawBuffer(GLenum attachmentPoint)
 void wrench::gl::FBO::setTextureAttachPoint(const Texture &texture, const GLenum attachmentPoint)
 {
   glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentPoint, texture.getTextureTarget(), texture.getTextureId(), 0);
+  OGLStatus::logOGLErrors("FBO - setTextureAttachPoint()");
+}
+
+void wrench::gl::FBO::resetDepthBuffer( )
+{
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
   OGLStatus::logOGLErrors("FBO - setTextureAttachPoint()");
 }
 
