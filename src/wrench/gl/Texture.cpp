@@ -136,14 +136,16 @@ const GLuint wrench::gl::Texture::getDataType(void) const
 
 bool wrench::gl::Texture::transferFromTexture(IplImage* image)
 {
-  //  TODO: Not sure if this needs to be bound here
-  bind(GL_TEXTURE5);
+  // If we have a depth component we need to read from the depth attachment, otherwise just color0
+  GLenum attachPoint = GL_COLOR_ATTACHMENT0;
+  if( GL_DEPTH_COMPONENT == m_format )
+	{ attachPoint = GL_DEPTH_ATTACHMENT; }
 
   if(nullptr == m_fbo)
   {
 	m_fbo = new FBO();
 	m_fbo->init(m_width, m_height);
-	m_fbo->setTextureAttachPoint(*this, GL_COLOR_ATTACHMENT0);
+	m_fbo->setTextureAttachPoint(*this, attachPoint);
   }
 
   bool compatible = _checkImageCompatibility(image);
@@ -151,13 +153,12 @@ bool wrench::gl::Texture::transferFromTexture(IplImage* image)
   if(compatible)
   {
 	const int channelCount = getChannelCount();
-
+	
 	m_fbo->bind();	
-	m_fbo->bindDrawBuffer(GL_COLOR_ATTACHMENT0);
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glReadBuffer(GL_COLOR_ATTACHMENT0); // Only need to call this if reading from the color attachment, wont hurt if using depth
 
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, m_PBOId);
-	glBufferData(GL_PIXEL_PACK_BUFFER, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_READ);
+	glBufferData(GL_PIXEL_PACK_BUFFER, m_width * m_height * channelCount * m_dataSize, nullptr, GL_STREAM_READ); 
 	glReadPixels(0, 0, m_width, m_height, m_format, m_dataType, 0);
 
 	if(GL_FLOAT == getDataType())
