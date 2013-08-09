@@ -118,6 +118,11 @@ void wrench::gl::ShaderProgram::bindAttributeLocation(const string name, GLuint 
     glBindAttribLocation(m_shaderID, index, name.c_str());
 }
 
+void wrench::gl::ShaderProgram::bindOutputLocation(const string name, const GLuint index)
+{
+  glBindFragDataLocation( m_shaderID, index, name.c_str( ) );
+}
+
 bool wrench::gl::ShaderProgram::_validateProgram(GLuint program)
 {
     bool validProgram = false;

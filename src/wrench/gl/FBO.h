@@ -77,6 +77,7 @@ namespace wrench
       void bind(void);
       void unbind(void);
       void bindDrawBuffer(GLenum attachmentPoint);
+	  void bindDrawBuffers( int numberOfBuffers, const GLenum *buffers );
       void setTextureAttachPoint(const Texture &texture, GLenum attachmentPoint);
 	  void resetDepthBuffer( );
       void process(void);

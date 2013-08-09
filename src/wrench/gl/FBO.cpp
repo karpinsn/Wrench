@@ -93,6 +93,11 @@ void wrench::gl::FBO::bindDrawBuffer(GLenum attachmentPoint)
   glDrawBuffer(attachmentPoint);
 }
 
+void wrench::gl::FBO::bindDrawBuffers( int numberOfBuffers, const GLenum *buffers )
+{
+  glDrawBuffers( numberOfBuffers, buffers );
+}
+
 void wrench::gl::FBO::setTextureAttachPoint(const Texture &texture, const GLenum attachmentPoint)
 {
   glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentPoint, texture.getTextureTarget(), texture.getTextureId(), 0);
